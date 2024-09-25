@@ -1,9 +1,13 @@
 #include <stdio.h>
 int main(){
-	int x[3],i,j;/** 3为数组元素数量 根据需要修改 **/
-    scanf("%d %d %d",&x[0],&x[1],&x[2]);
-	for(i=0;i<3;i++){
-		for(j=i+1;j<3;j++){
+	int n;
+	scanf("%d",&n);
+	int x[n],i,j;/** n为数组元素数量 根据需要修改 **/
+	for(int r=0;r<n;r++){
+		scanf("%d",&x[r]);
+	}
+	for(i=0;i<n;i++){
+		for(j=i+1;j<n;j++){
 			if(x[i]>x[j]&&i<j){
 				int t1=x[j],t2=x[i];
 				x[i]=t1;
@@ -11,6 +15,7 @@ int main(){
 			};
 		};
 	};
-	printf("%d %d %d",x[0],x[1],x[2]);
+	//输出排序后的数组 printf("%d %d %d",x[0],x[1],x[2]);
+	printf("%d\n",x[0]);
     return 0;
 };
