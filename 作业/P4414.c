@@ -17,13 +17,13 @@ int main(){
         switch (y[r])
         {
             case 'A':
-            printf("%d",x[0]);
+            printf("%d ",x[0]);
             break;
             case 'B':
-            printf("%d",x[1]);
+            printf("%d ",x[1]);
             break;
             case 'C':
-            printf("%d",x[2]);
+            printf("%d ",x[2]);
             break;
         }
     }
