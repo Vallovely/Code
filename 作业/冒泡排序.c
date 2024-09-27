@@ -16,6 +16,8 @@ int main(){
 		};
 	};
 	//输出排序后的数组 printf("%d %d %d",x[0],x[1],x[2]);
-	printf("%d\n",x[0]);
+	for(i=0;i<n;i++){
+		printf("%d ",x[i]);
+	}
     return 0;
 };
