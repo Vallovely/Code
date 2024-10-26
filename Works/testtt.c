@@ -1,7 +1,13 @@
 #include <stdio.h>
-#include <math.h>
-
-int main() {
-    float a=1.0/5.0;
-    printf("%.9f\n",a);
+void func(int a, int b){
+    a=5;
+    b=10;
+    printf("a=%d, b=%d\n", a, b);
+}
+int main(){
+    int a=1, b=2;
+    printf("a=%d, b=%d\n", a, b);
+    func(a, b);
+    printf("a=%d, b=%d\n", a, b);
+    return 0;
 }
