@@ -1,0 +1,78 @@
+在C语言中，声明语句的各个部分可以分为不同类型的部分，主要包括类型说明符、类型修饰符、声明符等。下面详细解释这些部分及其作用。
+
+1. 类型说明符（Type Specifiers）
+类型说明符用于指定变量的基本类型。常见的类型说明符包括：
+
+void：无类型，常用于函数返回类型或指针。
+char：字符类型。
+short：短整型。
+int：整型。
+long：长整型。
+float：单精度浮点型。
+double：双精度浮点型。
+signed：有符号类型（默认）。
+unsigned：无符号类型。
+2. 类型修饰符（Type Modifiers）
+类型修饰符用于修改类型说明符，以创建不同范围和精度的类型。常见的类型修饰符包括：
+
+signed：有符号类型（默认）。
+unsigned：无符号类型。
+long：长整型。
+short：短整型。
+3. 声明符（Declarators）
+声明符用于指定变量的名称及其附加属性，例如指针、数组等。常见的声明符包括：
+
+*：指针声明符。
+[]：数组声明符。
+()：函数声明符。
+4. 其他符号
+还有一些其他符号用于特定的声明和定义：
+
+const：常量修饰符，表示变量的值不能被修改。
+volatile：易变修饰符，表示变量的值可能会被外部因素改变。
+static：静态修饰符，表示变量的生命周期为整个程序运行期间。
+extern：外部修饰符，表示变量在其他文件中定义。
+示例
+1. 基本类型声明
+c
+深色版本
+int a;          // a 是一个普通的 int 变量
+char c;         // c 是一个 char 变量
+float f;        // f 是一个 float 变量
+double d;       // d 是一个 double 变量
+2. 类型修饰符
+c
+深色版本
+unsigned int a;     // a 是一个无符号 int 变量
+long int b;         // b 是一个长整型 int 变量
+short int c;        // c 是一个短整型 int 变量
+long long int d;    // d 是一个更长的长整型 int 变量
+3. 指针声明
+c
+深色版本
+int *p;         // p 是一个指向 int 的指针
+char *s;        // s 是一个指向 char 的指针
+4. 数组声明
+c
+深色版本
+int a[10];      // a 是一个包含10个 int 的数组
+char s[20];     // s 是一个包含20个 char 的数组
+5. 函数声明
+c
+深色版本
+int func(int a, int b);  // 声明一个返回 int 的函数，接受两个 int 参数
+6. 常量和易变修饰符
+c
+深色版本
+const int a = 10;    // a 是一个常量 int 变量
+volatile int b;      // b 是一个易变 int 变量
+7. 静态和外部修饰符
+c
+深色版本
+static int a;        // a 是一个静态 int 变量
+extern int b;        // b 是一个在其他文件中定义的 int 变量
+总结
+类型说明符：指定变量的基本类型，如 int, char, float 等。
+类型修饰符：修改类型说明符，如 unsigned, long, short 等。
+声明符：指定变量的名称及其附加属性，如指针 *, 数组 [], 函数 () 等。
+其他符号：用于特定的声明和定义，如 const, volatile, static, extern 等。

@@ -1,4 +1,4 @@
-// #include <stdio.h>
+
 // int main(){
 //   int a, b, c;
 //   scanf("%d %d %d", &a, &b, &c);
@@ -9,17 +9,16 @@
 
 #include <graphics.h>
 #include <stdbool.h>
-
+#include <stdio.h>
 int main() {
     // 初始化图形系统
-    initgraph(640, 480,0);
+    initgraph(200,200,0);
     
-    // 绘制一个红色矩形
-    setfillcolor(RED);
-    solidrectangle(100, 100, 200, 200);
-    
+    // 绘制一个蓝色矩形
+    setfillcolor(BLUE);
+    solidrectangle(1,1,100,100);
     // 暂停以查看效果
-    getch();
+    getchar();
     
     // 关闭图形界面
     closegraph();
