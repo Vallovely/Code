@@ -1,5 +1,12 @@
 {
     "files.associations": {
-        "P1597.C": "cpp"
+        "P1597.C": "cpp",
+        "stdio.h": "c",
+        "stdlib.h": "c",
+        "algorithm": "c",
+        "format": "c",
+        "variant": "c",
+        "stdbool.h": "c",
+        "random": "c"
     }
 }
