@@ -7,6 +7,8 @@
         "format": "c",
         "variant": "c",
         "stdbool.h": "c",
-        "random": "c"
+        "random": "c",
+        "cmath": "c",
+        "math.h": "c"
     }
 }
