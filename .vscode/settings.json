@@ -9,6 +9,8 @@
         "stdbool.h": "c",
         "random": "c",
         "cmath": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "cstdlib": "c",
+        "string.h": "c"
     }
 }
