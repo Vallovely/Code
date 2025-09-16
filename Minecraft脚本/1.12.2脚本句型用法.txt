@@ -1,0 +1,2659 @@
+作者推荐补丁:
+https://www.mcbbs.net/thread-1081290-1-1.html
+作用:修复Npc中chat事件在bukkit+forge服中无效
+
+https://www.mcbbs.net/thread-979548-1-1.html
+作用:优化JSON反序列化,提升性能以及部分修复
+
+
+
+
+	 请使用Notepad++中的JavaScript语言格式查看此文件！
+	 方法：最上方的 <语言(L)> ！<J>字开头！<JavaScript>
+	 以下内容均由 日期:2019/11/23 的网易1.12.2 CustomNpcs Mod作为准则所写!若有标注<网易当前不支持>全为网络资料,未经测试的!
+	 于 2020.11.30 改用最新版 CustomNpcs Mod作为准则所写,当前版本: CustomNPCs_1.12.2-(05Jul20),<网易当前不支持>标注 已废除
+	 悄悄话:作者喜欢用 1 格缩进,教程也是在 1 格缩进下写成(所以有些用空格缩进)
+			                              ---------by 不打酱油的酱油君
+
+
+
+2020.11.30 22:22  完善大部分事件使用!添加API列表
+2021.2.17 11:06   完成绝大部分事件,仅剩tossed无法解决!!更新部分API
+2021.2.21 0:27    添加 个人作品[白嫖福音] ,更新部分API,完善仅剩的 tossed事件!
+2021.3.11 13:09   添加[拓展],以及更新 [拓展]中{发送屏幕标题}以及{更简单的发送信息},更新部分API!添加 bukkit+forge 服中的chat修复办法!
+2021.3.21 11:11   更新部分API!修正 customChestClicked 的 heldItem 错误记录!个人作品[白嫖福音] 更新更多内容!
+2021.6.19 16:25   API部分作废!API使用将在 api中文翻译包 中进行更新,修正玩家事件中错误的pickedUp事件函数名为pickUp.修正部分事件错误记录
+
+
+在1.7.10中无需创建 事件函数 ,但是在1.12.2就需要了！
+如果有1.7.10的基础,那么在1.12.2就简单很多了!
+格式：function 事件名称(参数){执行部分}
+如:function interact(e){e.npc.say("hello!");}//粘贴至npc中
+如:function init(e){e.block.executeCommand("tell @a sss");}//粘贴至脚本方块中
+如:function interact(e){e.player.message("yes");}//粘贴至Players中
+如:function broken(e){e.player.message("You can not break it!");e.setCanceled(true);}//粘贴至Players中,这样玩家就没法破坏方块了 :)
+所有 事件名称 在本文最下方有列出,来源:noppes.npcs.constants.EnumScriptType
+
+Players部分，NPCmod版本1.12.204<日期:2019/11/23 网易当前不支持>
+//监听玩家按键,MC键代码:https://minecraft-zh.gamepedia.com/%E9%94%AE%E6%8E%A7%E4%BB%A3%E7%A0%81
+function keyPressed(e){
+ e.player.message(e.key);
+}
+
+
+//每个事件下方均配备一个例子及可用变量<若嫌麻烦,参数中的 event 可以改为其他字符,如:function init(e){print(e);}>
+[事件:
+	//每个事件都可以使用<event.API>,由于会大量重复,因此下文不再标注!
+	//每个事件都可以使用<event.API>,由于会大量重复,因此下文不再标注!
+	//每个事件都可以使用<event.API>,由于会大量重复,因此下文不再标注!
+	{方块事件[BlockEvent]:
+	 //本区域事件仅用于 <脚本方块/脚本门> 内
+		破坏事件[broken]:脚本方块/门 被破坏 时触发
+		function broken(event){
+			print(event);//事件
+			print(event.block);//被破坏的方块
+		}
+		点击事件[clicked]:左击 脚本方块/门 时触发
+		function clicked(event){
+			print(event);//事件
+			print(event.block);//被左击的方块
+			print(event.player);//左击的玩家
+		}
+		碰撞事件[collide]:与 脚本方块/门 碰撞,贴近 时触发
+		function collide(event){
+			print(event);//事件
+			print(event.block);//被碰撞的 脚本方块/门
+			print(event.entity);//碰撞的实体
+		}
+		开/关门事件[doorToggle]:开/关 脚本门 时触发
+		function doorToggle(event){
+			print(event);//事件
+			print(event.block);//被开/关 的脚本门
+		}
+		坠落事件[fallenUpon]:坠落在 脚本方块/门 上时触发<自动跳跃到方块上也算>
+		function fallenUpon(event){
+			print(event);//事件
+			print(event.block);//实体坠落向的 脚本方块/门
+			print(event.entity);//坠落向方块的实体
+			print(event.distanceFallen);//坠落高度
+		}
+		炸毁方块事件[exploded]:脚本方块/门 被炸毁 时触发
+		function exploded(event){
+			print(event);//事件
+			print(event.block);//被炸毁的方块
+		}
+		采集事件[harvested]:脚本方块/门 被 玩家挖掉 时触发
+		function harvested(event){
+			print(event);//事件
+			print(event.player);//破坏方块的玩家
+			print(event.block);//被破坏的方块
+		}
+		运行事件[init]:被初始化时触发.类似1.7.10中的运行,其特性:被初始化时触发,其他情况待考究.
+		function init(event){
+			print(event);//事件
+			print(event.block);//被初始化的 脚本方块/门
+		}
+		交互事件[interact]:右键 脚本方块/门 时触发
+		function interact(event){
+			print(event);//事件
+			print(event.player);//右击 脚本方块/门 的玩家
+			print(event.hitX);//脚本方块/门 距离玩家的X距离
+			print(event.hitY);//脚本方块/门 距离玩家的Y距离
+			print(event.hitZ);//脚本方块/门 距离玩家的Z距离
+			print(event.side);//被右键 脚本方块/门 的面,在 脚本方块/门 中:上1下0东4西5南2北3
+		}
+		相邻方块事件[neighborChanged]:在 脚本方块/门 上下左右前后 放置或者拆除方块时触发
+		function neighborChanged(event){
+			print(event);//事件
+			print(event.block);//触发事件的 脚本方块/门
+		}
+		降雨事件[rainFilled]:在 脚本方块 被雨水填充满时,类似耕地被水浇灌
+		function rainFilled(event){
+			print(event);//事件
+			print(event.block);//触发事件的 脚本方块/门
+		}
+		红石事件[redstone]:对 脚本方块/门 激活红石信号 时触发
+		function redstone(event){
+			print(event);//事件
+			print(event.block);//触发事件的 脚本方块/门
+			print(event.prevPower);//上一个红石信号的强度
+			print(event.power);//红石信号强度
+		}
+		计时器事件[timer]:可自定义更新间隔<时间单位:ticks>,使用如下例.
+		function init(event){
+			//启动1号计时器,更新间隔0ticks
+			event.block.timers.forceStart(1,0,true);
+		}
+		function timer(event){
+			//若计时器触发号为1
+			if(event.id == 1){
+				print(event);//事件
+				print(event.block);//触发事件的 脚本方块/门
+				print(event.id);//触发器编号
+			}
+		}
+		更新事件[tick]:每10ticks激活一次,10ticks≈0.5s
+		function tick(event){
+			print(event);//事件
+			print(event.block);//触发事件的 脚本方块/门
+		}
+	}
+	{Gui事件[CustomGuiEvent]:
+	 //本区域事件可用于 任意(如npc,player,脚本物品,脚本方块...) 内
+		按钮点击事件[customGuiButton]:玩家 点击Gui中按钮 时触发
+		//粘贴至npc中
+		function interact(e){
+			var gui=e.API.createCustomGui(1,256,256,false);//Gui的id,宽度,高度,是否暂停游戏(仅单人有效)
+			gui.setBackgroundTexture("minecraft:textures/gui/demo_background.png");//设置Gui的背景图片
+			gui.addTexturedButton(0,"test",50,50,50,50,"minecraft:textures/gui/demo_background.png");//按钮id,显示的字符,x坐标,y坐标,宽度,高度,图片路径
+			e.player.showCustomGui(gui);//使玩家打开Gui
+			gui.update(e.player);//将Gui信息更新给玩家
+		}
+		function customGuiButton(event){
+			print(event);//事件
+			print(event.gui);//触发事件的Gui
+			print(event.buttonId);//被点击的按钮id
+			print(event.player);//点击按钮槽位的玩家
+		}
+		关闭Gui事件[customGuiClosed]:玩家 关闭Gui 时触发,按Esc关闭不会触发.
+		//粘贴至npc中
+		function interact(e){
+			var gui=e.API.createCustomGui(1,256,256,false);//Gui的id,宽度,高度,是否暂停游戏(仅单人有效)
+			gui.setBackgroundTexture("minecraft:textures/gui/demo_background.png");//设置Gui的背景图片
+			e.player.showCustomGui(gui);//使玩家打开Gui
+			gui.update(e.player);//将Gui信息更新给玩家
+		}
+		function customGuiClosed(event){
+			print(event);//事件
+			print(event.gui);//被关闭的Gui
+			print(event.player);//关闭Gui的玩家
+		}
+		滚动列表事件[customGuiScroll]:玩家 滚动列表中的引索 时触发
+		//粘贴至npc中
+		function interact(e){
+			var gui=e.API.createCustomGui(1,256,256,false);//Gui的id,宽度,高度,是否暂停游戏(仅单人有效)
+			gui.setBackgroundTexture("minecraft:textures/gui/demo_background.png");//设置Gui的背景图片
+			gui.addScroll(0,50,50,80,100,["qwq","caca","coc","wow"]);//滑动引索id,x坐标,y坐标,宽度,高度,字符串列表
+			e.player.showCustomGui(gui);//使玩家打开Gui
+			gui.update(e.player);//将Gui信息更新给玩家
+		}
+		function customGuiScroll(event){
+			print(event);//事件
+			print(event.scrollId);//被点击的滑动列表id
+			print(event.selection);//滑动列表中的 字符串列表
+			print(event.doubleClick);//是否双击引索
+			print(event.scrollIndex);//当前点击引索
+			print(event.gui);//触发事件的Gui
+			print(event.player);//触发事件的的玩家
+		}
+		物品槽位点击事件[customGuiSlot]:玩家 点击Gui中物品槽位 时触发
+		//粘贴至npc中
+		function interact(e){
+			var item=e.world.createItem("minecraft:stone",0,1);//创建一个 石头 物品
+			var gui=e.API.createCustomGui(1,256,256,false);//Gui的id,宽度,高度,是否暂停游戏(仅单人有效)
+			gui.setBackgroundTexture("minecraft:textures/gui/demo_background.png");//设置Gui的背景图片
+			gui.addItemSlot(50,30);//添加一个物品槽位
+			gui.addItemSlot(50,50,item);//添加一个物品槽位,并在内设置一个 石头
+			e.player.showCustomGui(gui);//使玩家打开Gui
+			gui.update(e.player);//将Gui信息更新给玩家
+		}
+		function customGuiSlot(event){
+			print(event);//事件
+			print(event.slotId);//点击的槽位id
+			print(event.stack);//槽位中的物品,无物品则为空气(空气也算是物品吧?!)
+			print(event.gui);//触发事件的Gui
+			print(event.player);//触发事件的的玩家
+		}
+	}
+	{容器事件[CustomContainerEvent]:
+	 //本区域事件可用于 任意(如npc,player,脚本物品,脚本方块...) 内
+		点击容器事件[customChestClicked]:玩家点击容器槽位 时触发
+		//粘贴至npc中
+		function interact(e){
+			e.player.showChestGui(1);
+		}
+		function customChestClicked(event){
+			print(event);//事件
+			print(event.container);//点击的容器
+			print(event.slot);//玩家点击的槽位
+			print(event.slotItem);//玩家点击的槽位物品
+			print(event.player);//点击容器槽位的玩家
+			print(event.heldItem);//玩家鼠标中拖动的物品
+		}
+		关闭容器事件[customChestClosed]:玩家关闭容器 时触发
+		//粘贴至npc中
+		function interact(e){
+			e.player.showChestGui(2);
+		}
+		function customChestClosed(event){
+			print(event);//事件
+			print(event.player);//关闭容器的玩家
+			print(event.container);//被关闭的容器
+		}
+	}
+	{对话框事件[DialogEvent]:
+	 //本区域事件仅用于 <npc> 内
+		关闭对话框事件[dialogClose]:玩家关闭对话框 时触发
+		function dialogClose(event){
+			print(event);//事件
+			print(event.npc);//被关闭对话框的npc
+			print(event.player);//关闭对话框的玩家
+			print(event.dialog);//被关闭的对话框
+		}
+		对话框事件[dialog]:打开对话框 时触发
+		function dialog(event){
+			print(event);//事件
+			print(event.npc);//对话框npc
+			print(event.player);//打开对话框的玩家
+			print(event.dialog);//被打开的对话框
+		}
+		对话框选择事件[dialogOption]:选择对话框的对话框选项 时触发
+		function dialogOption(event){
+			print(event);//事件
+			print(event.npc);//对话框npc
+			print(event.player);//打开对话框的玩家
+			print(event.dialog);//被打开的对话框
+			print(event.option);//选择的对话框选项
+		}
+	}
+	{forge事件[ForgeEvent]:
+	//未知作用
+	}
+	{熔炉/工作台配方事件[HandlerEvent]:
+	//未知作用
+	}
+	{物品事件[ItemEvent]:
+	 //本区域事件仅用于 <脚本物品> 内
+		运行事件[init]:被初始化 时触发
+		function init(event){
+			print(event);//事件
+			print(event.item);//被初始化的物品
+		}
+		更新事件[tick]:放在 玩家背包时 每10ticks激活一次,10ticks≈0.5s
+		function tick(event){
+			print(event);//事件
+			print(event.item);//更新的物品
+			print(event.player);//拥有该被更新物品的玩家
+		}
+		对话事件[interact]:右击方块/生物/空气 时触发
+		function interact(event){
+			print(event);//事件
+			print(event.item);//右击的物品
+			print(event.player);//右击物品的玩家
+			print(event.type);//右击的类型,0为空气,1为生物,2为方块
+			print(event.target);//被右键的目标
+		}
+		攻击事件[attack]:左击方块/生物/空气 时触发
+		function attack(event){
+			print(event);//事件
+			print(event.item);//左击的物品
+			print(event.player);//左击物品的玩家
+			print(event.type);//左击的类型,0为空气,1为生物,2为方块
+			print(event.target);//被左键的目标
+		}
+		生成实体事件[spawn]:丢出物品时将变为实体物品,将会在此 时触发
+		function spawn(event){
+			print(event);//事件
+			print(event.item);//变为实体的物品
+			print(event.entity);//物品实体
+		}	
+		拾取事件[pickedUp]:捡起物品 时触发
+		function pickedUp(event){
+			print(event);//事件
+			print(event.item);//被捡起的物品
+			print(event.player);//捡起物品的玩家
+		}
+		丢弃事件[tossed]:丢出物品 时触发
+		function tossed(event){
+			print(event);//事件
+			print(event.entity)//被丢出的物品实体
+			print(event.item);//被丢出的物品
+			print(event.player);//捡起物品的玩家
+		}
+	}
+	{npc事件[NpcEvent]:
+	 //本区域事件仅用于 <npc> 内
+		碰撞事件[collide]:与npc发生碰撞 时触发
+		function collide(event){
+			print(event);//事件
+			print(event.npc);//发生碰撞的npc
+			print(event.entity);//碰撞npc的实体
+		}
+		伤害事件[damaged]:npc被攻击 时触发
+		function damaged(event){
+			print(event);//事件
+			print(event.npc);//被攻击的npc
+			print(event.source);//攻击npc的目标
+			print(event.damage);//造成的伤害
+			print(event.damageSource);//npc受到的伤害类型,详细可看noppes.npcs.api.IDamageSource
+		}
+		伤害类型:{
+		lava,岩浆伤害
+		inFire,火焰伤害【打火石右键地下的火】
+		lightningBolt,闪电伤害【被闪电击中】
+		onFire,着火伤害【被岩浆烧或者其他造成的火】
+		hotFloor,灼热伤害【踩在岩浆块】
+		fall,摔落伤害
+		cramming,<未知:掩埋伤害?>
+		starve,饥饿伤害【玩家饥饿时扣血】
+		flyIntoWall
+		generic
+		wither
+		fallingBlock
+		dragonBreath
+		fireworks
+		player,玩家伤害
+		mob,生物伤害
+		drown,溺水伤害
+		outOfWorld,掉出虚空伤害
+		explosion,爆炸伤害
+		anvil,铁砧掉落伤害
+		arrow,弓箭伤害
+		thrown,鱼竿【弹射物】伤害【包括NPC中的枪,魔杖,飞镖等等】
+		magic,魔法【中毒】伤害
+		indirectMagic,间接【瞬间伤害】魔法
+		cactus,仙人掌伤害
+		}
+		死亡事件[died]:npc死亡 时触发
+		function died(event){
+			print(event);//事件
+			print(event.npc);//死亡的npc
+			print(event.source);//杀死npc的生物
+			print(event.type);//npc死亡时受到的伤害类型
+			print(event.damageSource);//npc死亡时受到的伤害类型实例
+		}
+		运行事件[init]:npc被初始化 时触发
+		function init(event){
+			print(event);//事件
+			print(event.npc);//被初始化的npc
+		}
+		对话事件[interact]:右击npc 时触发
+		function interact(event){
+			print(event);//事件
+			print(event.npc);//被右击的npc
+			print(event.player);//右击npc的玩家
+		}
+		杀死事件[kill]:npc杀死生物 时触发
+		function kill(event){
+			print(event);//事件
+			print(event.npc);//杀死生物的npc
+			print(event.entity);//被npc杀死的实体
+		}
+		近战攻击事件[meleeAttack]:npc近战攻击 时触发
+		function meleeAttack(event){
+			print(event);//事件
+			print(event.npc);//发动攻击的npc
+			print(event.target);//npc攻击的目标
+			print(event.damage);//npc攻击目标造成的伤害
+		}
+		发射事件[rangedLaunched]:npc发射投掷物 时触发
+		function rangedLaunched(event){
+			print(event);//事件
+			print(event.npc);//发动攻击的npc
+			print(event.target);//攻击目标
+			print(event.damage);//造成的伤害
+			print(event.projectiles);//发射的 投掷物 数组(也可用于获取连发次数)
+		}
+		发现目标事件[target]:发现攻击目标 时触发
+		function target(event){
+			print(event);//事件
+			print(event.npc);//发现目标的npc
+			print(event.entity);//npc发现的目标
+		}
+		丢失目标事件[targetLost]:丢失攻击目标 时触发
+		function targetLost(event){
+			print(event);//事件
+			print(event.npc);//丢失目标的npc
+			print(event.entity);//npc丢失的目标
+		}
+		计时器事件[timer]:可自定义更新间隔<时间单位:ticks>,使用如下例.
+		function init(event){
+			//启动1号计时器,更新间隔0ticks
+			event.npc.timers.forceStart(1,0,true);
+		}
+		function timer(event){
+			//若计时器触发号为1
+			if(event.id == 1){
+				print(event.npc);//触发计时器的npc
+				print(event.id);//计时器编号
+			}
+		}
+		更新事件[tick]:每10ticks激活一次,10ticks≈0.5s
+		function tick(event){
+			print(event);//事件
+			print(event.npc);//被更新的npc
+		}
+	}
+	{玩家事件[PlayerEvent]:
+	 //本区域事件仅用于 <players> 内
+		攻击事件[attack]:玩家 左击 生物/方块 时触发
+		function attack(event){
+			print(event);//事件
+			print(event.player);//左击的玩家
+			print(event.type);//左击的类型,0为空气,1为生物,2为方块
+			print(event.target);//左击的目标
+		}
+		破坏事件[broken]:玩家破坏方块 时触发
+		function broken(event){
+			print(event);//事件
+			print(event.player);//破坏方块的玩家
+			print(event.block);//被破坏的方块
+			print(event.exp);//破坏方块所获得的经验
+		}
+		聊天框事件[chat]:玩家发出一条消息 时触发,发送指令不会激活.在Bukkit+Forge端使用chat时会导致无效,修复方法:https://www.mcbbs.net/thread-1081290-1-1.html
+		function chat(event){
+			print(event);//事件
+			print(event.player);//发出信息的玩家
+			print(event.message);//玩家发出的信息
+		}
+		关闭容器事件[containerClosed]:玩家关闭容器 时触发
+		function containerClosed(event){
+			print(event);//事件
+			print(event.player);//关闭容器的玩家
+			print(event.container);//被关闭的容器
+		}
+		打开容器事件[containerOpen]:玩家打开容器 时触发
+		function containerOpen(event){
+			print(event);//事件
+			print(event.player);//打开容器的玩家
+			print(event.container);//被打开的容器
+		}
+		攻击实体事件[damagedEntity]:玩家对实体造成伤害 时触发
+		function damagedEntity(event){
+			print(event);//事件
+			print(event.player);//造成伤害的玩家
+			print(event.target);//被伤害的目标
+			print(event.damage);//对伤害目标造成的伤害
+			print(event.damageSource);//对伤害目标造成的伤害类型
+		}
+		伤害事件[damaged]:玩家被攻击 时触发
+		function damage(event){
+			print(event);//事件
+			print(event.player);//受伤的玩家
+			print(event.source);//造成伤害的目标
+			print(event.damage);//造成的伤害数值
+			print(event.damageSource);//造成的伤害类型,详细可看noppes.npcs.api.IDamageSource
+		}
+		死亡事件[died]:玩家死亡 时触发
+		function died(event){
+			print(event);//事件
+			print(event.player);//死亡的玩家
+			print(event.type);//玩家死亡时受到的伤害类型
+			print(event.damageSource);//玩家死亡时受到的伤害类型实例
+			print(event.source);//杀死玩家的生物
+		}
+		玩家阵营点数事件[factionUpdate]玩家阵营点数发生变化 时触发
+		function factionUpdate(event){
+			print(event);//事件
+			print(event.player);//阵营点数发生变化的玩家
+			print(event.faction);//玩家阵营点数发生变化的阵营
+			print(event.points);//变化的点数
+			print(event.init);//<未知:是否被初始化?>
+		}
+		运行事件[init]:玩家被初始化 时触发
+		function init(event){
+			print(event);//事件
+			print(event.player);//被初始化的玩家
+		}
+		对话事件[interact]:玩家右击时触发,拿着物品时才可以右击空气
+		function interact(event){
+			print(event);//事件
+			print(event.player);//右击的玩家
+			print(event.type);//右击的类型,0为空气,1为生物,2为方块
+			print(event.target);//右击的目标
+		}
+		按键事件[keyPressed]:玩家按下任意键 时触发,打开容器或者打开对话框或者长按某个键不会触发
+		function keyPressed(event){
+			print(event);//事件
+			print(event.key);//玩家按下的按键的键代码
+			print(event.isCtrlPressed);//玩家是否按下Ctrl
+			print(event.isAltPressed);//玩家是否按下Alt
+			print(event.isShiftPressed);//玩家是否按下Shift
+			print(event.isMetaPressed);//玩家是否按下键
+		}
+		击杀事件[kill]:玩家杀死生物 时触发
+		function kill(event){
+			print(event);//事件
+			print(event.player);//杀死生物的玩家
+			print(event.entity);//被玩家杀死的生物
+		}
+		升级事件[levelUp]:玩家升级时触发,即提升level时
+		function levelUp(event){
+			print(event);//事件
+			print(event.player);//升级的玩家
+			print(event.change);//提升的等级,提升为负,降低为正,如:增加1级,此时为-1.减少1级,此时为1
+			/*旧版本的获取方式
+			var field=event.class.getDeclaredField("change");
+			field.setAccessible(true);
+			print(field.get(event));//提升的等级,提升为负,降低为正,如:增加1级,此时为-1.减少1级,此时为1
+			*/
+		}
+		登录事件[login]:玩家进入游戏 时触发
+		function login(event){
+			print(event);//事件
+			print(event.player);//进入游戏的玩家
+		}
+		退出事件[logout]:玩家退出游戏 时触发
+		function logout(event){
+			print(event);//事件
+			print(event.player);//退出游戏的玩家
+		}
+		拾取事件[pickUp]:玩家捡起物品 时触发
+		function pickUp(event){
+			print(event);//事件
+			print(event.player);//捡起物品的玩家
+			print(event.item);//被捡起的物品
+		}
+		发射事件[rangedLaunched]:玩家发射箭 时触发
+		function rangedLaunched(event){
+			print(event);//事件
+			print(event.player);//发射箭的玩家
+		}
+		计时器事件[timer]:可自定义更新间隔<时间单位:ticks>
+		function init(event){
+			event.player.timers.forceStart(1,1,true);
+		}
+		function timer(event){
+			//若计时器触发号为1
+			if(event.id == 1){
+				print(event.player);//触发计时器的player
+				print(event.id);//计时器编号
+			}
+		}
+		丢弃物品事件[toss]:玩家丢弃物品 时触发
+		function toss(event){
+			print(event);//事件
+			print(event.player);//丢弃物品的玩家
+			print(event.item);//被玩家丢弃的物品
+		}
+		更新事件[tick]:每10ticks激活一次,10ticks≈0.5s
+		function tick(event){
+			print(event);//事件
+			print(event.player);//被更新的玩家
+		}
+		脚本指令事件[scriptCommand]:仅输入 /noppes script run 时激活(不要问我为什么,自行了解:noppes.npcs.command.CmdScript.run())
+		function scriptCommand(event){
+			print(event.world);//所在世界
+			print(event.arguments);//参数
+			print(event.pos);//xyz坐标
+		}
+	}
+	{抛射物事件[ProjectileEvent]:
+	 //本区域事件可用于 任意(如npc,player,脚本物品,脚本方块...) 内
+		抛射物碰撞事件[projectileImpact]:抛射物插入方块,击中生物等等 时触发
+		//粘贴至npc中
+	 function interact(e){
+		var item=e.npc.world.createItem("minecraft:stone",0,1);
+		var shoot=e.npc.shootItem(e.player,item,100);
+		shoot.enableEvents();//启用抛射物事件
+	 }
+	 function projectileImpact(event){
+		print(event);//事件
+			print(event.projectile);//触发事件的抛射物
+			print(event.type);//抛射物产生碰撞类型,0为生物,1为方块
+			print(event.target);//碰撞目标,当type为0时为 生物(IEntity) 实例,当type为1时为 方块(IBlock) 实例
+	 }
+		抛射物更新事件[projectileTick]:每10ticks激活一次,10ticks≈0.5s
+		//粘贴至npc中
+	 function interact(e){
+		var item=e.npc.world.createItem("minecraft:stone",0,1);
+		var shoot=e.npc.shootItem(e.player,item,100);
+		shoot.enableEvents();//启用抛射物事件
+	 }
+	 function projectileTick(event){
+		print(event);//事件
+			print(event.projectile);//触发事件的抛射物
+	 }
+	 
+		
+		更多示例:
+		//粘贴至Players中,效果: 玩家发射抛射物 并 监听
+	function projectileImpact(event){
+		print(event);//事件
+			print(event.projectile);//触发事件的抛射物
+			print(event.type);//触发事件的抛射物
+			print(event.target);//触发事件的抛射物
+	}
+	function interact(e){
+	 var item=e.player.world.createItem("minecraft:stone",0,1);
+	 var shoot=entityshoot(e.player.getMCEntity(),100,item.getMCItemStack(),false,e.player.getMCEntity(),false);
+	 shoot.enableEvents();
+		/*注:
+		可直接 entityshoot(e.player.getMCEntity(),100,item.getMCItemStack(),false,e.player.getMCEntity(),false).enableEvents();
+		如果你不需要设置更多 抛射物 属性,那么上方代码更简便
+		*/
+	}
+	function entityshoot(target,accuracy, proj, indirect,entity,isNpc) {
+		return shoot(target.field_70165_t, (target.func_174813_aQ()).field_72338_b + (target.field_70131_O / 2), target.field_70161_v,accuracy,proj,indirect,entity,isNpc);
+	}
+	function shoot(x, y, z, accuracy, proj, indirect,entity,isNpc) {
+	 var MathHelper=Java.type("net.minecraft.util.math.MathHelper");
+		var NpcAPI=Java.type("noppes.npcs.api.NpcAPI");
+		var EntityProjectile=Java.type("noppes.npcs.entity.EntityProjectile");
+		var projectile = new EntityProjectile(entity.field_70170_p, entity, proj.func_77946_l(), isNpc);
+	 var varX = x - entity.field_70165_t;
+	 var varY = y - entity.field_70163_u + entity.func_70047_e();
+	 var varZ = z - entity.field_70161_v;
+	 var varF = projectile.hasGravity() ? MathHelper.func_76133_a(varX * varX + varZ * varZ) : 0;
+	 var angle = projectile.getAngleForXYZ(varX, varY, varZ, varF, indirect);
+	 var acc = 20 - MathHelper.func_76141_d(accuracy / 5);
+	 projectile.func_70186_c(varX, varY, varZ, angle, acc);
+	 entity.field_70170_p.func_72838_d(projectile);
+	 return NpcAPI.Instance().getIEntity(projectile);
+	}
+	}
+	{任务事件[QuestEvent]:
+	 //本区域事件仅用于 <players> 内
+		接受任务事件[questStart]:玩家接受任务 时触发
+		function questStart(event){
+			print(event);
+			print(event.quest);//被接受的任务
+			print(event.player);//接受任务的玩家
+		}
+		完成任务事件[questCompleted]:玩家完成任务 时触发
+		function questCompleted(event){
+			print(event);
+			print(event.quest);//完成的任务
+			print(event.player);//完成任务的玩家
+		}
+		提交任务事件[questTurnIn]:玩家完成任务后获得奖励 物品或经验 时触发
+		function questTurnIn(event){
+			print(event);
+			print(event.quest);//完成的任务
+			print(event.player);//完成任务的玩家
+			print(event.expReward);//给予的经验值
+			print(event.itemRewards);//给予的物品
+		}
+	}
+	{职业事件[RoleEvent]:
+	 //本区域事件仅用于 <npc> 内
+		职业触发事件[role]:当npc职业被触发 时激活
+		function role(event){
+			print(event);//职业事件,各个可触发职业都有其对应事件
+			print(event.npc);//被触发的npc
+			print(event.player);//触发的玩家
+		}
+		目前已收集触发方式:{
+			{商人:点击商人页面内任意一个槽位时,无论是否能够兑换
+			当点击商人一个无<需求物>与<交换物>的空槽时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+				print(event.slot);//交换物
+				print(event.currency1);//需求物1
+				print(event.currency2);//需求物2
+			}
+			
+			当<不满足>商人<交换条件>的槽位时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+				print(event.slot);//交换物
+				print(event.currency1);//需求物1
+				print(event.currency2);//需求物2
+				print(event.receiving);//未知,仅返回null与undefined,详情查看noppes.npcs.api.event.RoleEvent.TradeFailedEvent
+			}
+
+			}
+			
+			{雇佣随从:
+			当成功被雇佣时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+				print(event.days);//被雇佣的天数
+			}
+
+			当到达雇佣期限时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+			}
+
+			}
+			
+			{储存者:
+			当升级储存空间时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+				print(event.slot);//升级的储存空间的 标签号数
+			}
+
+			当解锁储存空间时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+				print(event.slot);//解锁的储存空间的 标签号数
+			}
+
+			}
+			
+			{传送师:
+			当使用传送师转送至某点时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+				print(event.location);//传送至坐标的集合
+				print(event.location.getId());//传送至坐标的id标签
+				print(event.location.getX());//传送至坐标的X坐标
+				print(event.location.getY());//传送至坐标的Y坐标
+				print(event.location.getZ());//传送至坐标的Z坐标
+				print(event.location.getName());//传送至坐标的名字
+				print(event.location.getDimension());//传送至坐标的世界
+				print(event.location.getDimension());//传送至坐标的激活类型,0为发现时激活,1为一开始就激活,2为交互后激活
+			}
+
+			当解锁某个传送点时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+			}
+			}
+		 
+			{信使:
+			玩家使用信使发送邮件时
+			function role(event){
+				print(event);//职业事件
+				print(event.npc);//被触发的npc
+				print(event.player);//触发的玩家
+				print(event.mail);//发送的邮件的集合
+				print(event.mail.getSender());//发送的邮件的发件人
+				print(event.mail.getSubject());//发送的邮件的标题
+				print(event.mail.getText());//发送的邮件的文本
+				print(event.mail.getQuest());//发送的邮件附赠任务,正常情况下无法使用,报错,需要使用event.mail.setQuest(任务id)
+				print(event.mail.getContainer());//发送的邮件的容器集合
+				print(event.mail.getContainer().getItems());//发送的邮件的物品
+				//更多函数请查看noppes.npcs.controllers.data.PlayerMail
+			}
+
+			}
+		}
+	}
+	{世界事件[WorldEvent]:
+	//未知作用
+	}
+]
+
+//API部分已作废,请下载 api中文翻译包
+//下载链接:https://share.weiyun.com/EOZvOt5E 密码：4k5fda
+[API:
+	{Api[NpcAPI]:
+		ICustomNpc createNPC(World World实例)
+		获取 ICustomNpc实例,不是生成npc!
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			e.npc.say(e.API.createNPC(e.npc.world.world));
+		}
+		
+		ICustomNpc spawnNPC(World World实例,int x坐标,int y坐标,int z坐标)
+		生成一个npc在world的x,y,z坐标生成一个npc(和用npc魔杖生成的一样)
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			e.API.spawnNPC(e.npc.world.world,214,4,850);
+			//效果:在 npc 当前世界中 214,4,850 处生成一个npc
+		}
+	
+		IEntity getIEntity(Entity Entity实例)
+		将 Entity实例 转为 IEntity实例
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			e.npc.say(e.API.getIEntity(e.player.getMCEntity()));
+		}
+	
+		IBlock getIBlock(World World实例,BlockPos 方块坐标)
+		获取 IBlock实例
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			var BlockPos=Java.type("net.minecraft.util.math.BlockPos");
+			e.npc.say(e.API.getIBlock(e.npc.world.world,new BlockPos(0,0,0)));
+			//效果:在 npc 当前世界中获取坐标为 0,0,0 的方块
+		}
+	
+		IContainer getIContainer(IInventory IInventory实例)
+		将 IInventory实例 转为 IContainer实例
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			var container=e.player.showChestGui(5);
+			print(e.API.getIContainer(container.getMCInventory()));
+			//npc的say不会输出null,所以改用print
+		}
+		
+		IContainer getIContainer(Container Container实例)
+		将 Container实例 转为 IContainer实例
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			var container=e.player.showChestGui(5);
+			print(e.API.getIContainer(container.getMCContainer()));
+			//npc的say不会输出null,所以改用print
+		}
+		
+		IItemStack getIItemStack(ItemStack ItemStack实例)
+		将 ItemStack实例 转为 IItemStack实例
+		
+		IWorld getIWorld(WorldServer WorldServer实例)
+		将 WorldServer实例 转为 IWorld实例
+		
+		IWorld getIWorld(int 世界id)
+		通过 世界id 获取 IWorld实例
+		
+		IWorld[] getIWorlds()
+		获取 所有世界
+		
+		INbt getINbt(NBTTagCompound NBTTagCompound实例)
+		将 NBTTagCompound实例 转为 INbt实例
+		
+		IPos getIPos(double x坐标, double y坐标, double z坐标)
+		通过 x,y,z坐标获取 IPos实例
+		
+		IFactionHandler getFactions()
+		获取 IFactionHandler实例(所有阵营)
+		
+		IRecipeHandler getRecipes()
+		获取 IRecipeHandler实例(使用添加的npc所有合成表)
+		
+		IQuestHandler getQuests()
+		获取 IQuestHandler实例(所有任务)
+		
+		IDialogHandler getDialogs()
+		获取 IDialogHandler实例(所有对话文档)
+		
+		ICloneHandler getClones()
+		获取 ICloneHandler实例(获取所有克隆npc,复制魔杖)
+		
+		IDamageSource getIDamageSource(DamageSource DamageSource实例)
+		将 DamageSource实例 转为 IDamageSource实例
+		
+		INbt stringToNbt(String nbt字符串)
+		使用 字符串获取 INbt实例,填入json字符串即可,值为字符串时 " 需要写成 \"
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			e.npc.say(e.API.stringToNbt("{TestNbt:5,Qwq:\"hhh\"}"));
+		}
+		
+		IPlayerMail createMail(String 发信人,String 标题)
+		获取 IPlayerMail实例(用于发信给某个玩家)
+		示例:
+		function interact(e){
+		//粘贴至npc中
+			var mail=e.API.createMail("HHHHHH","标题哦");
+			mail.setText(["没有内容哦!\n没有下一页了!","真没有!"]);//添加两页,分行请用 \n
+			e.player.sendMail(mail);
+		}
+	 
+		ICustomGui createCustomGui(int Gui的id,int 高度,int 宽度,boolean 是否暂停游戏)
+		获取 ICustomGui实例,是否暂停游戏 仅单人有效(用于打开自定义GUI)
+		示例:
+		function interact(e){
+		//粘贴至npc中
+			var gui=e.API.createCustomGui(1,256,256,false);//Gui的id,宽度,高度,是否暂停游戏(仅单人有效)
+			gui.setBackgroundTexture("minecraft:textures/gui/demo_background.png");//设置Gui的背景图片
+			e.player.showCustomGui(gui);//使玩家打开Gui
+			gui.update(e.player);//将Gui信息更新给玩家
+		}
+
+		INbt getRawPlayerData(String uuid)
+		通过 uuid 获取玩家的 INbt实例(可用于获取离线玩家,uuid可在 saves\你的地图名\playerdata 找到)
+		
+		EventBus events()
+		获取 EventBus实例(所有事件列表,也可注册事件)
+		
+		void registerCommand(CommandNoppesBase CommandNoppesBase实例)
+		注册 指令,相似类型:https://www.mcbbs.net/thread-879501-1-1.html
+		示例:
+		暂无示例
+		
+		File getGlobalDir()
+		获取 .minecraft 中的 customnpcs 资源文件库
+		
+		File getWorldDir()
+		获取 世界 存放路径中的 customnpcs 资源文件库
+		
+		boolean IsAvailable()
+		获取 customnpc 是否启用(卸载customnpc或其他情况会导致为false,正常情况为true)
+		
+		NpcAPI Instance()
+		获取 NpcAPI实例
+		
+		void registerPermissionNode(String 权限名,int 权限级)
+		注册权限级,和bukkit没任何关系,npc独立的.权限级:0为所有人,1为仅op,其他数字无效
+		
+		boolean hasPermissionNode(String 权限名)
+		获取是否有该 权限名
+		
+		String executeCommand(IWorld IWorld实例,String 指令)
+		执行指令,指令加不加 / 都无所谓,如: /gamemode 1与gamemode 1 没区别
+		示例:
+		function interact(e){
+			//粘贴至npc中
+			e.API.executeCommand(e.npc.world,"gamemode 1 xiao_2419");
+			//效果:将xiao_2419改为创造
+		}
+		
+		String getRandomName(int 名字词典, int 性别)
+		获取 customnpc 生成的随机名字,0为随机,名字词典最大为9.性别中1为男性,2为女性
+	}
+	{方块[Block]:
+	 
+	}
+	{生物[Entity]:
+	  
+		{玩家[IPlayer]:
+			String getDisplayName()
+			获取 玩家显示名字(可用插件或脚本更改)
+			示例:
+				function interact(e){
+					//粘贴至Players中
+					print(e.player.getDisplayName());
+				}
+			
+			String getName()
+			获取 玩家名字(固定名字,除非更换游戏名,否则无法修改,判断玩家名建议用getName())
+			
+			boolean hasFinishedQuest(int 任务id)
+			获取 玩家是否完成 任务
+			
+			boolean hasActiveQuest(int 任务id)
+			获取玩家 是否正在进行 任务
+			
+			void startQuest(int 任务id)
+			设置玩家开始 任务
+			
+			int factionStatus(int 阵营id)
+			获取 玩家阵营 点数
+			
+			void finishQuest(int 任务id)
+			设置玩家完成 任务
+			
+			void stopQuest(int 任务id)
+			停止玩家的 任务
+			
+			void removeQuest(int 任务id)
+			删除玩家的 任务(包括完成,未完成)
+			
+			boolean hasReadDialog(int 对话id)
+			玩家是否已经完成 对话
+			
+			void showDialog(int 对话id,String npc名字)
+			强制玩家打开 对话id
+			
+			void removeDialog(int 对话id)
+			删除玩家的 对话 记录
+			
+			void addDialog(int 对话id)
+			添加玩家的 对话 记录
+			
+			void addFactionPoints(int 阵营id,int 点数)
+			增加玩家的 阵营点数
+			
+			int getFactionPoints(int 阵营id)
+			获取玩家 阵营点数
+			
+			void message(String 信息)
+			给玩家发送一条 信息
+			示例:
+			function interact(e){
+				//粘贴至Players中
+				e.player.message("hhhhh");
+			}
+		 
+			int getGamemode()
+			获取玩家 游戏模式,0为生存,1为创造,2为冒险,3为旁观者
+			
+			void setGamemode(int 游戏模式)
+			设置玩家 游戏模式
+			
+			int inventoryItemCount(IItemStack IItemStack实例)
+			获取玩家背包中 IItemStack实例 的数量(仅匹配 物品id,损耗值)
+			
+			int inventoryItemCount(String 物品英文名字,int 损耗值)
+			获取玩家背包中 物品数量(仅匹配 物品id,损耗值)
+			
+			IContainer getInventory()
+			获取 IContainer实例(玩家背包)
+			
+			boolean removeItem(IItemStack IItemStack实例,int 数量)
+			删除玩家背包中 IItemStack实例(仅匹配 物品id,损耗值)
+			
+			boolean removeItem(String 物品英文名字,int 损耗值,int 数量)
+			删除玩家背包中 物品数量(仅匹配 物品id,损耗值)
+			
+			void removeAllItems(IItemStack IItemStack实例)
+			删除玩家背包中所有 IItemStack实例
+			
+			boolean giveItem(IItemStack IItemStack实例)
+			给予玩家 IItemStack实例
+			
+			boolean giveItem(String 物品英文名字,int 损耗值,int 数量)
+			给予玩家 物品
+			
+			void setSpawnpoint(int x坐标,int y坐标,int z坐标)
+			设置玩家重生位置
+			
+			void resetSpawnpoint()
+			重置玩家重生位置(相当于打掉床)
+			
+			boolean hasAchievement(String 成就名)
+			获取 玩家是否有完成 成就名,原版成就名 可在 net.minecraft.stats.StatList 中找到
+			其他mod的成就名需要在其他mod的lang文件或其他地方找到
+			示例:
+			function interact(e){
+				//粘贴至Players中
+				e.player.message(e.player.hasAchievement("stat.leaveGame"));
+			}
+			
+			int getExpLevel()
+			获取玩家当前 经验值(不是等级!)
+			
+			void setExpLevel(int 经验值)
+			设置玩家经验值
+			
+			boolean hasPermission(String 权限名)
+			获取玩家是否有权限,并非bukkit的权限!创建权限:e.API.registerPermissionNode(权限名,权限级)
+			
+			Object getPixelmonData()
+			获取 精灵宝可梦 信息(无精灵宝可梦mod则报错)
+			
+			ITimers getTimers()
+			获取 ITimers实例(计时器)
+			
+			void closeGui()
+			关闭玩家打开的Gui
+			
+			T getMCEntity()
+			获取 生物实例(EntityPlayerMP)
+			
+			IBlock getSpawnPoint()
+			获取玩家重生位置的方块
+			
+			void setSpawnPoint(IBlock IBlock实例)
+			通过 IBlock实例 设置玩家重生位置
+			
+			int getHunger()
+			获取玩家饥饿值
+			
+			void setHunger(int 饥饿值)
+			设置玩家饥饿值
+			
+			void kick(String 原因)
+			将玩家踢出游戏并 标注原因
+			
+			void sendNotification(String 标题,String 信息,int 背景图片)
+			发送一个信息给玩家(与任务提示一样,右上角弹出),背景图片范围:0-3
+			示例:
+			function interact(e){
+				//粘贴至npc中
+				e.player.sendNotification("test","hhh",3);
+			}
+			
+			void sendMail(IPlayerMail IPlayerMail实例)
+			给玩家发送一个邮件
+			示例:
+			function interact(e){
+	 			//粘贴至npc中
+				var mail=e.API.createMail("HHHHHH","标题哦");
+				mail.setText(["没有内容哦!\n没有下一页了!","真没有!"]);//添加两页,分行请用 \n
+				e.player.sendMail(mail);
+			}
+			
+			void clearData()
+			删除玩家所有永久储存,仅指玩家的生物Data,和血量饥饿值等无关
+			
+			IQuest[] getActiveQuests()
+			获取玩家正在进行的 任务列表
+			
+			IQuest[] getFinishedQuests()
+			获取玩家已经完成的 任务列表
+			
+			void updatePlayerInventory()
+			更新玩家背包(删改玩家背包物品时需要该 方法 进行背包与服务器 同步)
+			
+			void playSound(String 声音名称,float 音量, float 音调)
+			向玩家播放声音,声音名称请查看:https://minecraft-zh.gamepedia.com/Sounds.json#.E5.A3.B0.E9.9F.B3.E4.BA.8B.E4.BB.B6
+			示例:
+			function interact(e){
+	 			//粘贴至npc中
+				e.player.playSound("entity.pig.ambient",100,5);
+			}
+			
+			IContainer showChestGui(int 行数)
+			强制玩家打开 自定义箱子容器
+			示例:
+			function interact(e){
+				//粘贴至npc中
+				e.player.showChestGui(1);
+			}
+			
+			IContainer getOpenContainer()
+			获取玩家正在打开的 箱子容器
+			
+			boolean canQuestBeAccepted(int 任务id)
+			获取玩家是否可以接受 任务
+			
+			void showCustomGui(ICustomGui ICustomGui实例)
+			强制玩家打开 自定义GUI
+			示例:
+			function interact(e){
+				//粘贴至npc中
+				var gui=e.API.createCustomGui(1,256,256,false);//Gui的id,宽度,高度,是否暂停游戏(仅单人有效)
+				gui.setBackgroundTexture("minecraft:textures/gui/demo_background.png");//设置Gui的背景图片
+				e.player.showCustomGui(gui);//使玩家打开Gui
+				gui.update(e.player);//将Gui信息更新给玩家
+			}
+			
+			ICustomGui getCustomGui()
+			获取我那家正在打开的 自定义GUI
+		}
+	 
+		
+		{Npc[ICustomNpc]:
+			INPCDisplay getDisplay()
+			获取 INPCDisplay 实例,即Npc魔杖中 外形设置 部分
+			
+			INPCInventory getInventory()
+			获取 INPCInventory 实例,即Npc魔杖中 物品 部分
+			
+			INPCStats getStats()
+			获取 INPCStats 实例,即Npc魔杖中 属性设置 部分
+			
+			INPCAi getAi()
+			获取 INPCAi 实例,即Npc魔杖中 AI 部分
+			
+			INPCAdvanced getAdvanced()
+			获取 INPCAdvanced 实例,即Npc魔杖中 高级设置-台词 部分
+			
+			IFaction getFaction()
+			获取 IFaction 实例,即Npc魔杖中 高级设置-阵营 部分
+			
+			void setFaction(int 阵营id)
+			设置Npc阵营,阵营id可在 全局设置-阵营 中看到,随意点击一个阵营后 名称 最右方的 <ID> 下面那个数字
+			
+			INPCRole getRole()
+			获取 INPCRole 实例,即Npc魔杖中 高级设置-身份 部分
+			
+			INPCJob getJob()
+			获取 INPCJob 实例,即Npc魔杖中 高级设置-职业 部分
+			
+			ITimers getTimers()
+			获取 ITimers 实例,用于脚本中的Npc计时器事件(timer)
+			
+			int getHomeX()
+			获取Npc出生点X坐标
+			
+			int getHomeY()
+			获取Npc出生点Y坐标
+			
+			int getHomeZ()
+			获取Npc出生点Z坐标
+			
+			IEntityLivingBase getOwner()
+			获取Npc的主人,类似MC中驯服的狗.雇佣随从,同伴,护卫等都可改变主人
+			
+			void setHome(int x坐标,int y坐标,int z坐标)
+			设置Npc出生点XYZ坐标
+			
+			void reset()
+			重置Npc,重置后相当于 用Npc魔杖召唤出的Npc
+			
+			void say(String 信息)
+			让Npc向周围发送信息,范围:以Npc为中心 20*20*20,注意:颜色字符可以用 & 代替 § 
+			function interact(e){
+				//粘贴至npc中
+				npc.sayTo("&2Hello World!");
+			}
+			
+			void sayTo(IPlayer IPlayer实例,String 信息)
+			让Npc向 玩家 单独发送信息,注意:颜色字符可以用 & 代替 § 
+			示例:
+			function interact(e){
+				//粘贴至npc中
+				npc.sayTo(e.player,"就告诉你一人!");
+			}
+			
+			IProjectile shootItem(IEntityLivingBase IEntityLivingBase实例,IItemStack IItemStack实例,int 精准度)
+			让Npc向 IEntityLivingBase实例 发射一个 IItemStack实例 弹射物.精准度范围 1-100
+			示例:
+			function interact(e){
+				var item=e.npc.world.createItem("minecraft:gold_ingot",0,1);
+				e.npc.shootItem(e.player,item,100);
+			}
+			
+			IProjectile shootItem(double x坐标,double y坐标,double z坐标,IItemStack IItemStack实例,int 精准度)
+			让Npc向 XYZ坐标 发射一个 IItemStack实例 弹射物
+			
+			void giveItem(IPlayer IPlayer实例,IItemStack IItemStack实例)
+			给予玩家玩家物品
+			示例:
+			function interact(e){
+				var item=e.npc.world.createItem("minecraft:diamond",0,1);
+				e.npc.giveItem(e.player,item);
+			}
+			
+			void setDialog(int 对话框id,IDialog IDialog实例)
+			设置Npc对话框,IDialog实例 可通过 e.API.getDialogs().get(全局设置中对话框id) 获取
+			示例:
+			function init(e){
+				e.npc.setDialog(0,e.API.getDialogs().get(0));//若 全局设置中对话框id 不存在则无效
+			}
+			
+			IDialog getDialog(int 对话框id)
+			获取Npc IDialog实例,即Npc魔杖中 高级设置-对话框 部分.
+			对话框id 数字范围0-11,其他报错.对话框id在 Npc对话框界面 中 X 的左侧找到
+			
+			void updateClient()
+			更新客户端数据,一般在服务器与客户端数据不匹配时使用,比如 Npc名字 与 服务器中的 不符
+			
+			String executeCommand(String 指令)
+			让Npc执行指令,指令权限级为2级
+			示例:
+			function init(e){
+				e.npc.executeCommand("tell @a sss");
+			}
+		}
+		
+		
+		{生物[IEntityLiving]:
+			
+		}
+		
+		
+		{实体生物[IEntityLivingBase]:
+			
+		}
+		
+		
+		{实体[IEntity]:
+			
+		}
+	}
+	{界面[gui]:
+	}
+	{物品[Item]:
+		{脚本物品[ItemScriptedWrapper]:
+		}
+	}
+	{世界[IWorld]:
+		
+	}
+]
+
+
+
+
+[拓展
+	{发送屏幕标题
+
+
+//发送至主标题
+function sendTitle(player,message){
+	title(player,"TITLE","[{\"text\":\""+message+"\"}]",1,3,1);
+}
+//发送至副标题
+function sendSubTitle(player,message){
+	title(player,"SUBTITLE","[{\"text\":\""+message+"\"}]",1,3,1);
+}
+//发送至快捷栏上方
+function sendActionbar(player,message){
+	title(player,"ACTIONBAR","[{\"text\":\""+message+"\"}]",1,3,1);
+}
+//清除标题
+function clearTitle(player){
+	title(player,"CLEAR",null,-1,-1,-1);
+}
+//重置标题
+function resetTitle(player){
+	title(player,"RESET",null,-1,-1,-1);
+}
+/* 发送屏幕标题
+*player:发送至的玩家----填入实例化[IPlayer]或[EntityPlayerMP]
+*type:发送的标题类型----填入字符串[TITLE],[SUBTITLE],[ACTIONBAR],[TIMES],[CLEAR]或[RESET]
+--TITLE 主标题,SUBTITLE 副标题,ACTIONBAR 快捷栏上方
+--TIMES 标题时间,CLEAR 清除标题,RESET 重置标题
+*message:发送的信息----填入json字符串或实例化[ITextComponent]
+*fadeIn:淡入时间----填入整数[int]
+*display:停留时间----填入整数[int]
+*fadeOut:淡出时间----填入整数[int]
+*作者:君油酱的油酱打不,出现错误请联系:2782876939
+*/
+function title(player,type,message,fadeIn,display,fadeOut){
+	var SPacketTitle=Java.type("net.minecraft.network.play.server.SPacketTitle");
+	var IPlayer=Java.type("noppes.npcs.api.entity.IPlayer");
+	var EntityPlayerMP=Java.type("net.minecraft.entity.player.EntityPlayerMP");
+	var SPacketTitle=Java.type("net.minecraft.network.play.server.SPacketTitle");
+	var ITextComponent=Java.type("net.minecraft.util.text.ITextComponent");
+	if(player instanceof IPlayer){
+		player=player.getMCEntity();
+	}else if(!(player instanceof EntityPlayerMP)){
+		throw "player必须为 实例化[IPlayer]或[EntityPlayerMP]";
+	}
+ if(message!=null && !(message instanceof ITextComponent)){
+		message=ITextComponent.Serializer.func_150699_a(message);
+	}
+	var packet=new SPacketTitle(SPacketTitle.Type.func_179969_a(type),message,fadeIn,display,fadeOut);
+	player.field_71135_a.func_147359_a(packet);
+}
+
+
+示例:
+function interact(e){
+	//粘贴至 npc 中
+	sendTitle(e.player,"§4这是主标题");
+	//显示标题内容
+}
+
+function interact(e){
+	//粘贴至 npc 中
+	sendTitle(e.player," ");
+	sendSubTitle(e.player,"hhhhhhhh");
+	//单独显示副标题内容
+}
+
+function interact(e){
+	//粘贴至 npc 中
+	sendTitle(e.player," ");
+	sendSubTitle(e.player," ");
+	sendActionbar(e.player,"wqwqccc");
+	//单独显示快捷栏上方内容
+}
+
+
+	}
+	
+	{更简单的发送信息
+
+
+/* sendChat
+*obj 填入字符串或 Object对象.由type决定类型
+*tpye 填入字符串.为 score 时,obj必须为Object对象,且有name和score属性名.为 key 时obj必须为字符串
+
+click中:
+0为地址【点击后打开网页】
+1为打开的文件路径【点击后打开该文件路径】
+2为执行的指令【点击后会使玩家输入指令】
+3为推荐玩家执行的指令【点击后会在玩家输入窗口粘贴内容】
+4为书与笔页面跳转,仅用书与笔中
+hover中:
+0为显示的文本【鼠标移动至该字段时显示一段文本】
+1为显示物品nbt,若输入内容不为 NBTTagCompound 实例则无效
+2为显示实体nbt,若输入内容不为 NBTTagCompound 实例则无效
+
+更多示例如下:
+
+function interact(e){
+	//粘贴至 npc 中
+	var chat=new sendChat("hhh",null);
+	chat.send(e.player.getMCEntity());//向玩家发送一个信息,内容为"hhh"
+}
+
+function interact(e){
+	//粘贴至 npc 中
+	var chat=new sendChat("鼠标对着我!",null);//创建一个信息,内容为"鼠标对着我!"
+	chat.hover(0,"chenggggg\nhhhhh").send(e.player.getMCEntity());//向玩家发送一个信息,鼠标移动至其信息后显示"chenggggg\nhhhhh",\n用于分段
+}
+
+function interact(e){
+	//粘贴至 npc 中
+	e.player.getMCEntity().func_145747_a(e.player.getMainhandItem().getMCItemStack().func_151000_E());//向玩家展示手中物品
+}
+*/
+function sendChat(obj,type){
+	var TextComponentKeybind=Java.type("net.minecraft.util.text.TextComponentKeybind");
+	var TextComponentScore=Java.type("net.minecraft.util.text.TextComponentScore");
+	var TextComponentString=Java.type("net.minecraft.util.text.TextComponentString");
+	var TextComponentTranslation=Java.type("net.minecraft.util.text.TextComponentTranslation");
+	var ITextComponent=Java.type("net.minecraft.util.text.ITextComponent");
+	var ClickEvent=Java.type("net.minecraft.util.text.event.ClickEvent");
+	var HoverEvent=Java.type("net.minecraft.util.text.event.HoverEvent");
+	var HoverAction=Java.type("net.minecraft.util.text.event.HoverEvent.Action");
+	var ClickAction=Java.type("net.minecraft.util.text.event.ClickEvent.Action");
+	var NBTTagCompound=Java.type("net.minecraft.nbt.NBTTagCompound");
+	var String=Java.type("java.lang.String");
+	this.Chat=obj instanceof ITextComponent?obj:type=="key"?new TextComponentKeybind(obj):type=="score"?new TextComponentScore(obj.name,obj.score):new TextComponentString(obj.toString());
+	this.ChatStyle=this.Chat.func_150256_b();
+	//添加点击效果
+	this.click=function(action,string){
+		switch(action){
+			case 0:
+			action=ClickAction.OPEN_URL;
+			break;
+			case 1:
+			action=ClickAction.OPEN_FILE;
+			break;
+			case 2:
+			action=ClickAction.RUN_COMMAND;
+			break;
+			case 3:
+			action=ClickAction.SUGGEST_COMMAND;
+			break;
+			case 4:
+			action=ClickAction.CHANGE_PAGE;
+			break;
+		}
+		this.ChatStyle.func_150241_a(new ClickEvent(action,string));
+		return new sendChat(this.Chat);
+	}
+	//添加停留显示文本效果
+	this.hover=function(action,value){
+		switch(action){
+			case 0:
+			action=HoverAction.SHOW_TEXT;
+			if((value instanceof String)){
+				value=new TextComponentTranslation(value.toString(),{});
+			}
+			break;
+			case 1:
+			action=HoverAction.SHOW_ITEM;
+			if(!(value instanceof NBTTagCompound)){
+				value=new TextComponentTranslation(new NBTTagCompound(),{});
+			}
+			break;
+			case 2:
+			action=HoverAction.SHOW_ENTITY;
+			if(!(value instanceof NBTTagCompound)){
+				value=new TextComponentTranslation(new NBTTagCompound(),{});
+			}
+			break;
+		}
+		this.ChatStyle.func_150209_a(new HoverEvent(action,value));
+		return new sendChat(this.Chat);
+	}
+	//信息拼接,chat2请填入 字符串 或 ITextComponent实例
+	this.appendSibling=function(chat2){
+		chat2=chat2 instanceof ITextComponent?chat2:new TextComponentTranslation(chat2.toString(),{});
+		return new sendChat(this.Chat.func_150257_a(chat2));
+	}
+	//返回 ITextComponent 实例
+	this.chat=function(){
+		return this.Chat;
+	}
+	//向玩家发送信息 player 请填入 EntityPlayerMP实例
+	this.send=function(player){
+		player.func_145747_a(this.chat());
+	}
+	//添加 按着shift+左击 粘贴文本至聊天输入框 效果,string请填入 字符串
+	this.insertion=function(string){
+		this.ChatStyle.func_179989_a(string);
+		return new sendChat(this.Chat);
+	}
+}
+
+
+	}
+	
+	{脚本
+		
+		
+
+		
+	}
+]
+
+
+{个人作品[白嫖福音]:
+/*请使用 CustomNPCs_1.12.2-(05Jul20) 七月份更新的 及 以上 的版本!
+*下载链接:https://www.mcbbs.net/thread-936521-1-1.html
+*作者使用mod链接：https://share.weiyun.com/JiKSCOdb 密码：tggi8u
+*作者:君油酱的油酱打不,QQ:2782876939,如果产生报错请联系作者
+*花大量时间搓的好意思白嫖?要得不多,就俩圆圆的就好 ↓
+*点进链接后要做什么,懂的都懂:https://space.bilibili.com/77034512
+*已制作完毕:雷霆领主的法令,超级TNT,密码门,不灭之握,土豆地雷,瞳术-死亡凝视,ChatFix
+*打赏请联系作者,仅接受 支付宝/微信(要求定制同样)
+*/
+
+	{雷霆领主的法令:
+	 
+//粘贴至Players中
+var cd=10000;//1000毫秒=1秒
+var range=5;//范围
+var key=47;//按键 47 代表 V
+var update_tick=1;//刷新频率,20ticks≈1秒
+var canMessage=true;//是否启用提示
+function Lightning_Show(player,world,range){
+ var x=player.getX(),z=player.getZ();
+ for(var angle=0;angle<60;angle++){
+  var h=2*Math.PI/360*6*angle;
+  var x1 = x + Math.sin(h)*range;
+  var z1 = z - Math.cos(h)*range;
+  world.thunderStrike(x1,player.getY(),z1);
+	}
+}
+function timer(e){
+	if(e.id==888){
+		update(e.player);
+	}
+}
+function update(player){
+	var store=player.getStoreddata();
+	var can=eval(store.get("Lightning"));
+	var time=store.get("Lightning_Time");
+	var date=new Date().getTime();
+	if(!can && time<date){
+		store.put("Lightning","true");
+		message(player,"§5§l[技能-雷霆领主的法令]§9§l已冷却完毕,按 §4§lV §9§l释放");
+	}
+}
+function keyPressed(e){
+ if(e.key==key){
+		var player=e.player;
+  player.timers.forceStart(888,update_tick,true);
+		var date=new Date().getTime();
+		var store=player.getStoreddata();
+		if(!store.has("Lightning")){
+			store.put("Lightning","true");
+		}
+		var can=eval(store.get("Lightning"));
+	 if(can){
+	 	store.put("Lightning","false");
+			store.put("Lightning_Time",date+cd);
+		 Lightning_Show(player,player.world,range);
+			message(player,"§5§l[技能-雷霆领主的法令]§2§l成功释放!冷却 §6"+cd/1000+" §2秒");
+	 }else{
+			var time=store.get("Lightning_Time");
+	  var time_t=((time-date)/1000).toFixed(1);
+	  message(player,"§5§l[技能-雷霆领主的法令]§4§l冷却还需要 §6"+time_t+" §4秒");
+	 }
+ }
+}
+function message(player,mess){
+	if(canMessage){
+		player.message(mess);
+	}
+}
+
+		
+	}
+	
+	{王之宝库:
+		
+	}
+	
+	{无限剑制-投影:
+		
+	}
+	
+	{不灭之握:
+		
+//粘贴至Players中
+var exDamage=0.5;//造成的魔法伤害,大于0小于1则为最大生命百分比
+var heal=0.9;//治疗血量,大于0小于1则为最大生命百分比
+var time=6000;//造成伤害最大间隔时间
+var cd=60000;//冷却时间
+
+var canAttackFriendlyNpc=false;//是否可以对友方npc使用
+var canAttackNeutralNpc=false;//是否可以对中立npc使用
+var canAttackAggressiveNpc=true;//是否可以对敌对npc使用
+var canAttackPlayer=true;//是否可以对玩家使用
+var canAttackFriendlyPlayer=true;//是否可以对队友使用
+var canOp=false;//是否仅Op允许使用
+var gamemode={};//能够造成伤害的模式
+
+var useMessage=true;//是否启用攻击提示
+function timer(e){
+	if(e.id==885){
+		var player=e.player;
+		var store=player.getStoreddata();
+		var Count=store.get("countGrasp");
+		var Time=store.get("timeGrasp");
+		var Cd=store.get("cdGrasp");
+		var canCd=store.get("canCdGrasp");
+		var date=new Date().getTime();
+		if(Cd<date && eval(canCd)){
+			message(player,"§5§l[不灭之握]§6不灭之握 §2结束冷却完毕");
+			store.put("cdGrasp",0);
+			store.put("canCdGrasp","false");
+			return;
+		}
+		if(date>Time && Count>0){
+			message(player,"§5§l[不灭之握]§6不灭之握 §4效果结束冷却 §6"+cd/1000+" §4秒");
+			store.put("countGrasp",0);
+			store.put("cdGrasp",date+cd);
+			store.put("canGrasp","false");
+			store.put("canCdGrasp","true");
+			return;
+		}
+	}
+}
+function draw(player,maxAngle,range,name){
+ var x=player.getX(),z=player.getZ();
+	var mcplayer=player.getMCEntity();
+ for(var angle=0;angle<maxAngle;angle++){
+  var h=2*Math.PI/360*6*angle;
+  var x1 = x + Math.sin(h)*range;
+  var z1 = z - Math.cos(h)*range;
+  player.world.spawnParticle(name,x1,player.y+0.5,z1,0,0,0,1,1);
+	}
+}
+function attack(e){
+	if(e.type==1){
+		var IEntityLivingBase=Java.type("noppes.npcs.api.entity.IEntityLivingBase");
+		var ICustomNpc=Java.type("noppes.npcs.api.entity.ICustomNpc");
+		var IPlayer=Java.type("noppes.npcs.api.entity.IPlayer");
+		var target=e.target;
+		var player=e.player;
+		var mcplayer=player.getMCEntity();
+		if(!new myCase().isOp(mcplayer,canOp)){
+			return;
+		}
+		if(!new myCase().isLivingBase(target)){
+			return;
+		}
+	 if(new myCase().isNpc(target,mcplayer,canAttackFriendlyNpc,canAttackNeutralNpc,canAttackAggressiveNpc)){
+	  return;
+		}
+		if(new myCase().isPlayer(target,mcplayer,canAttackPlayer,canAttackFriendlyPlayer,gamemode)){
+		 return;
+		}
+		var store=player.getStoreddata();
+	 player.timers.forceStart(885,1,true);
+	 if(!store.has("canGrasp")){
+	 	store.put("canGrasp","false");
+	 }
+	 if(!store.has("timeGrasp")){
+	 	store.put("timeGrasp",0);
+	 }
+	 if(!store.has("cdGrasp")){
+	 	store.put("cdGrasp",0);
+	 }
+ 	if(!store.has("canCdGrasp")){
+ 		store.put("canCdGrasp","false");
+ 	}
+	 if(!store.has("countGrasp")){
+	 	store.put("countGrasp",0);
+	 }
+		var date=new Date().getTime();
+		var Cd=store.get("cdGrasp");
+		var Count=store.get("countGrasp");
+		var Time=store.get("timeGrasp");
+		var Can=store.get("canGrasp");
+		var canCd=store.get("canCdGrasp");
+		if(eval(canCd)){
+			return;
+		}
+		if(eval(Can)){
+			var DamageSource=Java.type("net.minecraft.util.DamageSource");
+			var temp_heal=heal>0 && heal<1?player.getMaxHealth()*heal:heal;
+			player.getMCEntity().func_70691_i(temp_heal);
+			var temp_exDamage=exDamage>0 && exDamage<1?target.getMaxHealth()*exDamage:exDamage;
+			target.getMCEntity().func_70097_a(DamageSource.field_76376_m,temp_exDamage);
+			store.put("timeGrasp",0);
+			store.put("canGrasp","false");
+			return;
+		}
+		var add=15;//每次攻击增加圆弧
+		Count++;
+		var maxAngle=Count*add;
+		maxAngle=maxAngle>60?60:maxAngle;
+		draw(player,maxAngle,1,"happyVillager");
+		store.put("timeGrasp",date+time);
+		store.put("countGrasp",Count);
+		if(maxAngle==60){
+			var temp_exDamage=exDamage>0 && exDamage<1?"击中生物最大血量"+(exDamage*100)+"%%":exDamage;
+			var temp_heal=heal>0 && heal<1?"最大血量"+(heal*100)+"%%":heal;
+ 		message(player,"§5§l[不灭之握]§2下次攻击造成 §6"+temp_exDamage+" §2点魔法伤害,恢复 §6"+temp_heal+" §2点血量");
+			store.put("canGrasp","true");
+			return;
+		}
+		message(player,"§5§l[不灭之握]§2还需攻击 §6"+(Math.ceil(60/add)-Count)+" §2次触发");
+	}
+}
+function message(player,mess){
+	if(useMessage){
+		player.message(mess);
+	}
+}
+/*Soys的配置变量
+*case1,case2,case3等等都属于顶层代码中配置变量所需,正常使用请填true
+*各个case如何使用请参考 君油酱的油酱打不 的更多示例!
+*/
+function myCase(){
+	var IEntityLivingBase=Java.type("noppes.npcs.api.entity.IEntityLivingBase");
+	var ICustomNpc=Java.type("noppes.npcs.api.entity.ICustomNpc");
+	var IPlayer=Java.type("noppes.npcs.api.entity.IPlayer");
+	/* mcplayer 是否为 Op */
+	this.isOp=function(mcplayer,case1){
+	 var NoppesUtilServer=Java.type("noppes.npcs.NoppesUtilServer");
+		if(NoppesUtilServer.isOp(mcplayer)){
+	  return true;
+		}
+		if(!case1){
+	 	return true;
+	 }
+		return false;
+	}
+ /* target 是否有继承 IEntityLivingBase */
+	this.isLivingBase=function(target){
+		if((target instanceof IEntityLivingBase)){
+			return true;
+		}
+		return false;
+	}
+ /* target 是否有继承 ICustomNpc */
+	this.isNpc=function(target,mcplayer,case1,case2,case3){
+		if(target instanceof ICustomNpc){
+			var faction=target.faction;
+			if(faction.isFriendlyToPlayer(mcplayer)){
+			 if(!case1){
+			  return true;
+			 }
+				return false;
+			}
+			if(faction.isNeutralToPlayer(mcplayer)){
+			 if(!case2){
+			 	return true;
+			 }
+				return false;
+			}
+			if(faction.isAggressiveToPlayer(mcplayer)){
+			 if(!case3){
+			 	return true;
+			 }
+				return false;
+			}else if(mcplayer.field_71075_bZ.field_75098_d){
+				return false;
+			}
+			return true;
+		}
+		return false;
+ }
+	/* target 是否有继承 IPlayer   case3 应填入Object */
+	this.isPlayer=function(target,mcplayer,case1,case2,case3){
+	 if(target instanceof IPlayer){
+			if(!case1){
+				return false;
+			}
+			var target_p=target;
+			if(case2){
+			 var team_p=mcplayer.func_96124_cp();
+		  var team_t=target_p.getMCEntity().func_96124_cp();
+		  if(team_p!=null && team_t!=null){
+			 	if(team_p.func_96661_b()==team_t.func_96661_b() && !team_p.func_96665_g()){
+			   return true;
+		 		}
+		 	}
+				return false;
+			}
+			if(Object.keys(case3).length>0){
+				if(!case3[target_p.getGamemode()]){
+					return true;
+				}
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+}
+
+
+	}
+	
+	{超级TNT:
+		
+//粘贴至 脚本方块 中,和平模式下不会对玩家造成伤害!
+var time=100;//延迟爆炸,100ticks≈5秒
+var range=10;//爆炸范围
+var breakBlock=true;//是否破坏方块
+var fire=true;//是否着火
+var message_range=20;//距离内发送提示
+var breakScriptBlock=false;//脚本方块是否会被炸毁
+var IPlayer=Java.type("noppes.npcs.api.entity.IPlayer");
+function exploded(e){
+ if(!breakScriptBlock){
+		e.setCanceled(true);
+	}
+}
+function init(e){
+	var block=e.block;
+	var store=block.getStoreddata();
+	if(!store.has("canInteract")){
+		store.put("canInteract","true");
+	}
+ block.setModel("minecraft:tnt");
+ var text=e.block.getTextPlane();
+	text.setScale(4);
+	text.setOffsetX(0);
+	text.setOffsetY(0.25);
+	text.setOffsetZ(0.1);
+	text.setText("&4超级TNT");
+	block.timers.stop(887);
+	block.timers.stop(886);
+}
+function timer(e){
+	var block=e.block;
+	if(e.id==887){
+		block.world.spawnParticle("largesmoke",block.x+0.5,block.y+1.2,block.z+0.5,0,0,0,10,0.5);
+	}
+	if(e.id==886){
+  messageRangePlayer(block.getPos(),block.world,message_range,"§5§l[超级TNT]§4嘭!");
+		block.timers.stop(887);
+ 	block.timers.stop(886);
+		block.world.explode(block.x,block.y,block.z,che,fire,breakBlock);
+	 block.getStoreddata().put("canInteract","true");
+	}
+}
+function interact(e){
+	var block=e.block;
+	var store=block.getStoreddata();
+	var canInteract=eval(store.get("canInteract"));
+	if(canInteract){
+	 block.timers.forceStart(887,1,true);
+		block.timers.forceStart(886,time,false);
+		store.put("canInteract","false");
+		messageRangePlayer(block.getPos(),block.world,message_range,"§5§l[超级TNT]§4超级TNT §6"+time/20+" §4秒后爆炸!");
+	}
+}
+function messageRangePlayer(pos,world,range,message){
+	var players=world.getNearbyEntities(pos,range,range);
+	for(var count=0;count<players.length;count++){
+		if(players[count] instanceof IPlayer){
+			players[count].message(message);
+		}
+	}
+}
+
+		
+	}
+	
+	{密码门:
+		
+//粘贴至 脚本门 中
+var passwork="12345";//密码,必须五位数字
+var maxTryCount=1;//最大尝试次数
+var closeGui=false;//超出最大尝试次数是否强制关闭
+var updateTryCount=true;//是否允许刷新尝试次数
+var cd=60000;//超过最大尝试次数时冷却时间 1000毫秒=1秒
+var Guipasswork="";
+function init(e){
+	var store=e.block.getStoreddata();
+	if(!store.has("canOpen")){
+	 store.put("canOpen","true");
+	}
+	e.block.setBlockModel("minecraft:iron_door");
+}
+function doorToggle(e){
+	var store=e.block.getStoreddata();
+	if(!eval(store.get("canOpen"))){
+	 e.setCanceled(true);
+	}
+}
+function interact(e){
+	var player=e.player;
+	if(passwork.length!=5 || isNaN(passwork)){
+		player.message("§5§l[密码门]§4密码门产生严重错误!密码必须为五位数字!");
+		return;
+	}
+	var playerName=player.getDisplayName();
+	var block=e.block;
+	var store=block.getStoreddata();
+	if(player.isSneaking() && eval(store.get("canOpen"))){
+		store.put("canOpen","false");
+		player.message("§5§l[密码门]§2成功上锁!");
+		e.setCanceled(true);
+		return;
+	}
+	if(eval(store.get("canOpen"))){
+		return;
+	}
+	if(!store.has("Try_"+playerName)){
+		store.put("Try_"+playerName,0);
+	}
+	if(!store.has("Cd_"+playerName)){
+		store.put("Cd_"+playerName,0);
+	}
+	update_TryCount(store,playerName);
+	if(maxTryCount>store.get("Try_"+playerName)){
+		GuiShow(player);
+		player.getTempdata().put("Open_Passwork",block);
+		return;
+	}
+	var Cd=store.get("Cd_"+playerName);
+	var time=((Cd-new Date().getTime())/1000).toFixed(1);
+	player.message("§5§l[密码门]§4您已超出尝试次数!请等待 "+time+" 秒后再尝试");
+}
+function GuiShow(player){
+	Guipasswork="";
+	var NpcAPI=Java.type("noppes.npcs.api.NpcAPI");
+	NpcAPI=NpcAPI.Instance();
+	var buttons=[
+	["7","8","9"],
+	["4","5","6"],
+	["1","2","3"],
+	["删除","0","确认"]
+	];
+	var gui=NpcAPI.createCustomGui(99,150,256,false);
+	gui.setBackgroundTexture("minecraft:textures/gui/demo_background.png");
+	for(var a=0;a<buttons.length;a++){
+		for(var b=0;b<buttons[a].length;b++){
+			var button=gui.addTexturedButton(a*3+b,buttons[a][b],30+30*b,30+30*a,28,28,"minecraft:textures/gui/container/creative_inventory/tabs.png");
+	  button.setTextureOffset(0,4);
+		}
+	}
+	for(var c=0;c<5;c++){
+	 gui.addTexturedRect(12+c,"minecraft:textures/particle/footprint.png",30+c*18,8,16,16,0,0);
+	}
+	player.showCustomGui(gui);
+	gui.update(player);
+}
+function RGB(R,G,B){
+	return B+256*G+65536*R;
+}
+function update_TryCount(store,playerName){
+ if(new Date().getTime()>store.get("Cd_"+playerName) && updateTryCount){
+		store.put("Try_"+playerName,0);
+		store.put("Cd_"+playerName,new Date().getTime()+cd);
+	}
+}
+function customGuiButton(e){
+	var BlockScriptedDoorWrapper=Java.type("noppes.npcs.api.wrapper.BlockScriptedDoorWrapper");
+	var player=e.player;
+	var playerName=player.getDisplayName();
+	var temp=player.getTempdata();
+	var block=temp.get("Open_Passwork");
+	var store_b=block.getStoreddata();
+	var Try=eval(store_b.get("Try_"+playerName));
+	var Cd=store_b.get("Cd_"+playerName);
+	update_TryCount(store_b,playerName);
+	if(Try>maxTryCount && closeGui){
+		player.closeGui();
+	}
+	if(block instanceof BlockScriptedDoorWrapper){
+		if(e.gui.getID()==99){
+			var buttons=[
+			 "7","8","9",
+			 "4","5","6",
+			 "1","2","3",
+			 "删除","0","确认"
+			];
+			var pwl=Guipasswork.length;
+			var message=function(mess){
+				e.gui.addLabel(98,mess,25,148,150,16,RGB(0,128,0));
+	   e.gui.update(player);
+			}
+			switch(buttons[e.buttonId]){
+				case "删除":
+				if(pwl>0){
+			 	Guipasswork=Guipasswork.substring(0,pwl-1);
+			 	e.gui.addLabel(pwl+17-1,"",36+18*(pwl-1),5,25,25,RGB(255,165,0));
+			 	e.gui.update(player);
+				}
+				break;
+				case "确认":
+				if(maxTryCount<Try){
+					var time=((Cd-new Date().getTime())/1000).toFixed(1);
+					message("§5§l[密码门]§4频繁操作!请等待 "+time+" 秒后再尝试");
+					break;
+				}
+				if(passwork.equals(Guipasswork)){
+					store_b.put("canOpen","true");
+					block.setOpen(!block.getOpen());
+					player.message("§5§l[密码门]§2密码正确!");
+					player.closeGui();
+					return;
+				}
+				store_b.put("Try_"+playerName,Try+1);
+				message("§4密码错误!您还有 "+(maxTryCount-Try)+" 次机会");
+				break;
+				default:
+				if(pwl>=5){
+					message("已到达密码门上限");
+					break;
+				}
+				Guipasswork+=buttons[e.buttonId];
+				e.gui.addLabel(pwl+17,buttons[e.buttonId],36+18*pwl,5,25,25,RGB(255,165,0));
+				e.gui.update(player);
+				break;
+			}
+		}
+	}
+}
+function customGuiClosed(e){
+	var BlockScriptedDoorWrapper=Java.type("noppes.npcs.api.wrapper.BlockScriptedDoorWrapper");
+	var player=e.player;
+	player.message("yes");
+	var temp=player.getTempdata();
+	if(temp.get("Open_Passwork") instanceof BlockScriptedDoorWrapper){
+		if(e.gui.getID()==99){
+			temp.remove("Open_Passwork");
+		}
+	}
+}
+
+  
+	}
+	
+	{瞳术-死亡凝视:
+		
+//粘贴至 Players 中
+var key=45//键代码45 为 X
+
+var exDamage=0.1;//死亡凝视 造成的伤害,大于0小于1则为最大生命百分比
+var interval=2000;//死亡凝视 造成伤害间隔,1000毫秒=1秒
+var range=10;//死亡凝视 范围
+var cd=6000;//冷却时间,为0时则无冷却
+var useTime=30000;//死亡凝视 持续时间,为0时则无限时长,1000毫秒=1秒
+
+var canOff=true;//是否允许玩家自行关闭 死亡凝视
+
+var canAttackFriendlyNpc=false;//是否可以对友方npc使用
+var canAttackNeutralNpc=true;//是否可以对中立npc使用
+var canAttackAggressiveNpc=true;//是否可以对敌对npc使用
+var canAttackPlayer=true;//是否可以对玩家使用
+var canAttackFriendlyPlayer=true;//是否可以对队友使用
+var canOp=false;//是否仅Op允许使用
+var gamemode={0:true,2:true};//能够受到伤害的模式
+
+var canMessage=true;//是否启用提示
+var update_tick=1;//刷新频率
+function timer(e){
+	var player=e.player;
+	var mcplayer=player.getMCEntity();
+	var store=player.getStoreddata();
+	if(e.id==883 && useTime>0){
+		update(player);
+	}
+	var use=eval(store.get("use_dieEyes"));
+	if(use){
+		var date=new Date().getTime();
+		var Interval=store.get("interval_dieEyes");
+  if(date>Interval){
+	  var entitys=player.rayTraceEntities(range,true,true);//是否无视 (水方块,流动水,岩浆)等遮挡,(高草丛,草,玫瑰丛)等遮挡
+   if(entitys.length>0){
+	  	var target=entitys[0];
+	  	if(new myCase().isNpc(target,mcplayer,canAttackFriendlyNpc,canAttackNeutralNpc,canAttackAggressiveNpc)){
+	  	 return;
+	  	}
+	  	if(new myCase().isPlayer(target,mcplayer,canAttackPlayer,canAttackFriendlyPlayer,gamemode)){
+	  	 return;
+	  	}
+				var DamageSource=Java.type("net.minecraft.util.DamageSource");
+	  	var temp_exDamage=exDamage>0 && exDamage<1?target.getMaxHealth()*exDamage:exDamage;
+				target.getMCEntity().func_70097_a(DamageSource.func_76365_a(player.getMCEntity()),temp_exDamage);
+				store.put("interval_dieEyes",date+interval);
+		 }
+  }
+	}
+}
+function update(player){
+	var store=player.getStoreddata();
+	var Cd=store.get("cd_dieEyes");
+	var on=store.get("on_dieEyes");
+	var can=!eval(store.get("can_dieEyes"));
+	var date=new Date().getTime();
+	if(date>Cd && can){
+		message(player,"§5§l[瞳术-死亡凝视]§9已冷却完毕,按 §4§lX §9§l释放");
+		store.put("can_dieEyes","true");
+	}
+	var use=eval(store.get("use_dieEyes"));
+	if(use){
+		if(date>on){
+	 	message(player,"§5§l[瞳术-死亡凝视]§6死亡凝视 §4效果结束,冷却 §6"+cd/1000+" §4秒");
+	 	store.put("use_dieEyes","false"); 
+			store.put("cd_dieEyes",date+cd); 
+			store.put("can_dieEyes","false"); 
+		}
+	}
+}
+function keyPressed(e){
+	if(e.key==key){
+		var player=e.player;
+		var store=player.getStoreddata();
+		if(!store.has("interval_dieEyes")){
+			store.put("interval_dieEyes",0);
+		}
+		if(!store.has("use_dieEyes")){
+			store.put("use_dieEyes","false");
+		}
+		if(!store.has("can_dieEyes")){
+			store.put("can_dieEyes","true");
+		}
+		if(!store.has("cd_dieEyes")){
+			store.put("cd_dieEyes",0);
+		}
+		if(!store.has("on_dieEyes")){
+			store.put("on_dieEyes",0);
+		}
+		var use=!eval(store.get("use_dieEyes"));
+		var date=new Date().getTime();
+		var mcplayer=player.getMCEntity();
+		if(!new myCase().isOp(mcplayer,canOp)){
+			return;
+		}
+		if(cd>0){
+			player.timers.forceStart(883,update_tick,true);
+			if(use){
+				var Cd=store.get("cd_dieEyes");
+				var can=!eval(store.get("can_dieEyes"));
+				if(date<Cd && can){
+					var time_t=((Cd-date)/1000).toFixed(1);
+					message(player,"§5§l[瞳术-死亡凝视]§4冷却还需要 §6"+time_t+" §4秒");
+					return;
+				}
+				store.put("on_dieEyes",date+useTime);
+			}
+			if(!canOff){
+				return;
+			}
+		}
+		if(use){
+		 store.put("interval_dieEyes",date+interval);
+		}else if(cd>0){
+			store.put("on_dieEyes",0);
+			return;
+		}
+		var mess=use?"§2开启":"§4关闭";
+		store.put("use_dieEyes",use+"");
+		message(player,"§5§l[瞳术-死亡凝视]"+mess+" §d死亡凝视");
+	}
+}
+function message(player,mess){
+	if(canMessage){
+		player.message(mess);
+	}
+}
+/*Soys的配置变量
+*case1,case2,case3等等都属于顶层代码中配置变量所需,正常使用请填true
+*各个case如何使用请参考 君油酱的油酱打不 的更多示例!
+*/
+function myCase(){
+	var IEntityLivingBase=Java.type("noppes.npcs.api.entity.IEntityLivingBase");
+	var ICustomNpc=Java.type("noppes.npcs.api.entity.ICustomNpc");
+	var IPlayer=Java.type("noppes.npcs.api.entity.IPlayer");
+	/* mcplayer 是否为 Op */
+	this.isOp=function(mcplayer,case1){
+	 var NoppesUtilServer=Java.type("noppes.npcs.NoppesUtilServer");
+		if(NoppesUtilServer.isOp(mcplayer)){
+	  return true;
+		}
+		if(!case1){
+	 	return true;
+	 }
+		return false;
+	}
+ /* target 是否有继承 IEntityLivingBase */
+	this.isLivingBase=function(target){
+		if((target instanceof IEntityLivingBase)){
+			return true;
+		}
+		return false;
+	}
+ /* target 是否有继承 ICustomNpc */
+	this.isNpc=function(target,mcplayer,case1,case2,case3){
+		if(target instanceof ICustomNpc){
+			var faction=target.faction;
+			if(faction.isFriendlyToPlayer(mcplayer)){
+			 if(!case1){
+			  return true;
+			 }
+				return false;
+			}
+			if(faction.isNeutralToPlayer(mcplayer)){
+			 if(!case2){
+			 	return true;
+			 }
+				return false;
+			}
+			if(faction.isAggressiveToPlayer(mcplayer)){
+			 if(!case3){
+			 	return true;
+			 }
+				return false;
+			}else if(mcplayer.field_71075_bZ.field_75098_d){
+				return false;
+			}
+			return true;
+		}
+		return false;
+ }
+	/* target 是否有继承 IPlayer   case3 应填入Object */
+	this.isPlayer=function(target,mcplayer,case1,case2,case3){
+	 if(target instanceof IPlayer){
+			if(!case1){
+				return false;
+			}
+			var target_p=target;
+			if(case2){
+			 var team_p=mcplayer.func_96124_cp();
+		  var team_t=target_p.getMCEntity().func_96124_cp();
+		  if(team_p!=null && team_t!=null){
+			 	if(team_p.func_96661_b()==team_t.func_96661_b() && !team_p.func_96665_g()){
+			   return true;
+		 		}
+		 	}
+				return false;
+			}
+			if(Object.keys(case3).length>0){
+				if(!case3[target_p.getGamemode()]){
+					return true;
+				}
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+}
+
+
+	}
+	
+	{三段斩:
+		
+	}
+	
+ 	{银光落刃:
+		
+	}
+	
+	{强化台:
+	 
+	}
+	
+	{便携式物品袋:
+		
+	}
+	
+	{灵魂绑定:
+		
+	}
+	
+	{镶嵌:
+		
+	}
+	
+	{背刺:
+		
+	}
+	
+	{护盾猛击:
+		
+	}
+	
+	{战争热诚:
+		
+	}
+	
+	{战争领主的嗜血:
+		
+	}
+	
+	{无尽之刃:
+		
+	}
+	
+	{神秘之剑[杀人刀]:
+		
+	}
+	
+	{万箭齐发:
+		
+	}
+	
+	{奥术跃迁:
+		
+	}
+	
+	{土豆地雷:
+	
+//粘贴至 脚本方块 中
+var canRe=true;//是否可以重复使用
+var reCd=5000;//可重复使用时冷却时间,1000毫秒=1秒
+var reParticle=true;//冷却时是否开启烟雾提示
+
+var hide=false;//是否隐藏地雷
+
+var hurtPlayer=true;//是否在和平情况下对玩家造成伤害
+var hurt=20;//在和平情况下对玩家造成的伤害
+
+var canRedPower=true;//是否允许使用红石触发
+var icon="minecraft:potato";//土豆地雷模型
+
+var inRange=2;//触发范围
+var playerOnly=true;//是否仅玩家进入范围触发
+var gamemode={0:true,2:true};//玩家在什么模式下才触发
+
+var range=3;//爆炸范围
+var breakBlock=false;//是否破坏方块
+var fire=true;//是否着火
+
+var breakScriptBlock=false;//脚本方块是否会被炸毁
+var update=1;//刷新频率
+function exploded(e){
+ if(!breakScriptBlock){
+		e.setCanceled(true);
+	}
+}
+function init(e){
+	var block=e.block;
+	var store=block.getStoreddata();
+	if(!store.has("boom")){
+		store.put("boom","true");
+	}
+	if(!store.has("cd")){
+		store.put("cd",0);
+	}
+	var icon_t=hide?"minecraft:barrier":icon;
+	block.setModel(icon_t);
+	block.setScale(0.5,0.5,0.5);
+	block.setIsPassible(true);
+	block.setRotation(90,90,90);
+	block.timers.forceStart(884,update,true);
+}
+function timer(e){
+	if(e.id==884){
+		var block=e.block;
+		var store=block.getStoreddata();
+		var boom=eval(store.get("boom"));
+		if(!boom && reParticle){
+			block.world.spawnParticle("largesmoke",block.x+0.5,block.y,block.z+0.5,0,0,0,1,0.1);
+		}
+		var type=playerOnly?1:-1;
+		var NE=block.world.getNearbyEntities(block.getPos(),inRange,type);
+		if(playerOnly){
+			var NE_t=[];
+			for(var count=0;count<NE.length;count++){
+				if(!gamemode[NE[count].getGamemode()]){
+					return;
+				}
+				NE_t.push(NE[count]);
+			}
+			NE=NE_t;
+		}
+		show(block,NE,false);
+	}
+}
+function redstone(e){
+	if(canRedPower){
+	 var block=e.block;
+	 var type=playerOnly?1:-1;
+	 var NE=block.world.getNearbyEntities(block.getPos(),inRange,type);
+	 show(block,NE,true);
+	}
+}
+function show(block,NE,type){
+	var IPlayer=Java.type("noppes.npcs.api.entity.IPlayer");
+	var DamageSource=Java.type("net.minecraft.util.DamageSource");
+	var EnumDifficulty=Java.type("net.minecraft.world.EnumDifficulty");
+	var date=new Date().getTime();
+	var store=block.getStoreddata();
+	var boom=eval(store.get("boom"));
+	var cd=store.get("cd");
+	if(boom){
+		if(NE.length>0){
+			if(hurtPlayer && block.world.getMCWorld().func_175659_aa()==EnumDifficulty.PEACEFUL){
+				for(var count=0;count<NE.length;count++){
+					if(NE[count] instanceof IPlayer){
+						if(gamemode[NE[count].getGamemode()]){
+							NE[count].getMCEntity().func_70097_a(DamageSource.field_76376_m,hurt);
+						}
+					}
+				}
+			}
+			type=true;
+		}
+		if(type){
+			store.put("boom","false");
+			store.put("cd",date+reCd);
+			block.world.explode(block.x,block.y,block.z,range,fire,breakBlock);
+			block.world.spawnParticle("lava",block.x+0.5,block.y,block.z+0.5,0,0,0,1,100);
+		}
+	}else if(date>cd && canRe){
+		store.put("boom","true");
+	}
+}
+
+
+	}
+	
+	{M4A1:
+		
+	}
+	
+	{LV6气流上升:
+		
+	}
+	
+	{LV5矢量操作:
+		
+	}
+	
+	{登神长阶:
+		
+	}
+	
+	{Explosion[来自慧慧的祝福]:
+		
+	}
+	
+	{无限钻石矿:
+		
+	}
+	
+	{超级熔炉:
+		
+	}
+	
+	{大哥大[上个世纪的手机]:
+		
+	}
+	
+	{ChatFix:
+		//用于 修复Npc中chat事件在bukkit+forge服中无效
+		//粘贴至 Npc 中
+/**
+ * @authorHueihuea
+ * @VERSION 2020.01.24.00.27
+ */
+
+/** 
+ * 枚举优先级
+ * @enum {*} BukkitEventPriority.LOWEST  最低;
+ * @enum {*} BukkitEventPriority.LOW     较低;
+ * @enum {*} BukkitEventPriority.NORMAL  正常;
+ * @enum {*} BukkitEventPriority.HIGH    较高;
+ * @enum {*} BukkitEventPriority.HIGHEST 很高;
+ * @enum {*} BukkitEventPriority.MONITOR 最高;
+ * @description 注意 在MONITOR优先级下 您不应该对事件进行任何操作 它仅仅是为监听而存在。
+ */
+function BukkitEventPriority() {
+  BukkitEventPriority.LOWEST;
+  BukkitEventPriority.LOW;
+  BukkitEventPriority.NORMAL;
+  BukkitEventPriority.HIGH;
+  BukkitEventPriority.HIGHEST;
+  BukkitEventPriority.MONITOR;
+}
+{
+  var EventPriority = Java.type("org.bukkit.event.EventPriority");
+  BukkitEventPriority.LOWEST = EventPriority.LOWEST;
+  BukkitEventPriority.LOW = EventPriority.LOW;
+  BukkitEventPriority.NORMAL = EventPriority.NORMAL;
+  BukkitEventPriority.HIGH = EventPriority.HIGH;
+  BukkitEventPriority.HIGHEST = EventPriority.HIGHEST;
+  BukkitEventPriority.MONITOR = EventPriority.MONITOR;
+}
+/**
+ * 用于构建一个监听器对象 (删去异步信息,当前未知会产生什么错误--by 君油酱的油酱打不)
+ * @param {String} event 要监听的事件
+ * @param {"org.bukkit.event.EventPriority"} priority 优先级
+ * @param {Function} executeFunction 执行函数
+ * @param {Boolean} ignoreCancelled 可空，是否跳过已撤销的事件
+ * @param {"org.bukkit.event.Listener"} listener 可空，监听器对象
+ * @param {"org.bukkit.plugin.Plugin"} plugin 可空，插件对象
+ * [url=home.php?mod=space&uid=109629]@See[/url] BukkitEventPriority
+ */
+function BukkitEventListener(event, priority, executeFunction, ignoreCancelled, listener, plugin) {
+  var server = Java.type("org.bukkit.Bukkit").getServer();
+  var Class = Java.type("java.lang.Class");
+  var eventType = Class.forName(event);
+  if (!Class.forName("org.bukkit.event.Event").isAssignableFrom(eventType)) {
+    throw new Error("The event isn't a bukkit event.");
+  }
+  var RegisteredListener = Java.type("org.bukkit.plugin.RegisteredListener");
+  ignoreCancelled = (ignoreCancelled == null) ? false : ignoreCancelled;
+  listener = Java.extend(Java.type("org.bukkit.event.Listener"), {});
+  listener = new listener();
+  plugin = Java.extend(Java.type("org.bukkit.plugin.Plugin"), {
+    getDescription: function () {
+      var PluginDescriptionFile = Java.type("org.bukkit.plugin.PluginDescriptionFile");
+      return new PluginDescriptionFile("FakePlugin", "1.0", "null")
+    },
+    isEnabled: function () {
+      return true;
+    }
+  });
+  plugin = new plugin();
+  executor = Java.extend(Java.type("org.bukkit.plugin.EventExecutor"), {
+    execute: function (paramListener, paramEvent) {
+      try {
+        var Class = Java.type("java.lang.Class");
+        if (!eventType.isAssignableFrom(paramEvent.getClass())) {
+          return;
+        }
+        var CustomTimingsHandler = Java.type("org.spigotmc.CustomTimingsHandler");
+        var timings = new CustomTimingsHandler("");//删去异步信息,当前未知会产生什么错误
+        var isAsync = paramEvent.isAsynchronous();
+        if (!isAsync) {
+          timings.startTiming();
+        }
+        executeFunction.call(null, paramEvent);
+        if (!isAsync) {
+          timings.stopTiming();
+        }
+      } catch (err) {
+        var InvocationTargetException = Java.type("java.lang.reflect.InvocationTargetException");
+        var EventException = Java.type("org.bukkit.event.EventException");
+        if (err instanceof InvocationTargetException) {
+          throw new EventException(err.getCause());
+        }
+        throw new EventException(err);
+      }
+    }
+  });
+  var executor = new executor();
+  var registeredListener = new RegisteredListener(listener, executor, priority, plugin, ignoreCancelled);
+  /**
+   * 用于注册这个监听器
+   */
+  this.register = function () {
+    this.getEventListeners().register(registeredListener);
+  }
+  /**
+   * 用于撤销这个监听器 
+   */
+  this.unregister = function () {
+    this.getEventListeners().unregister(registeredListener);
+  }
+  this.getEventListeners = function () {
+    var manager = server.getPluginManager();
+    var getEventListeners = manager.getClass().getDeclaredMethod("getEventListeners", Class.forName("java.lang.Class"));
+    getEventListeners.setAccessible(true);
+    return getEventListeners.invoke(manager, eventType);
+  }
+}
+function interact(e){
+	var EntityPlayer=Java.type("net.minecraft.entity.player.EntityPlayer");
+	var EntityNPCInterface=Java.type("noppes.npcs.entity.EntityNPCInterface");
+	var PlayerData=Java.type("noppes.npcs.controllers.data.PlayerData");
+	var EventHooks=Java.type("noppes.npcs.EventHooks");
+	var PlayerEvent=Java.type("noppes.npcs.api.event.PlayerEvent");
+	var npc=e.npc;
+	var temp=npc.getTempdata();
+	if(!temp.has("FixChat")){
+		var Event=new BukkitEventListener("org.bukkit.event.player.AsyncPlayerChatEvent",EventPriority.NORMAL,function(event){
+			var player=EntityPlayer.class.cast(event.getPlayer().getHandle());
+			if(player==EntityNPCInterface.ChatEventPlayer){
+				return;
+			}
+			var handler=PlayerData.get(player).scriptData;
+			var message=event.getMessage();
+			var ev=new PlayerEvent.ChatEvent(handler.getPlayer(),message);
+			EventHooks.onPlayerChat(handler,ev)
+			event.setCancelled(ev.isCanceled());
+			if(!message.equals(ev.message)){
+				event.setMessage(ev.message);
+			}
+		});
+		temp.put("FixChat",Event);
+		Event.register();
+		npc.say("§2注册FixChat事件");
+	}else{
+		temp.get("FixChat").unregister();
+		temp.remove("FixChat");
+		npc.say("§4注销§2FixChat事件");
+	}
+}
+
+		
+		
+	}
+}
+
+下列是npcmod所有事件<函数名>,若有未列出的,请联系作者进行更新!
+qq:2782876939,b站:不打酱油的酱油君--xiao
+		INIT("init"),  
+		TICK("tick"),  
+		INTERACT("interact"),  
+		DIALOG("dialog"),  
+		DAMAGED("damaged"),  
+		DIED("died"),  
+		ATTACK_MELEE("meleeAttack"),  
+		TARGET("target"),  
+		COLLIDE("collide"),  
+		KILL("kill"),  
+		DIALOG_OPTION("dialogOption"),  
+		TARGET_LOST("targetLost"),  
+		ROLE("role"),  
+		RANGED_LAUNCHED("rangedLaunched"),  
+		CLICKED("clicked"),  
+		FALLEN_UPON("fallenUpon"),  
+		RAIN_FILLED("rainFilled"),  
+		BROKEN("broken"),  
+		HARVESTED("harvested"),  
+		EXPLODED("exploded"),  
+		NEIGHBOR_CHANGED("neighborChanged"),  
+		REDSTONE("redstone"),  
+		DOOR_TOGGLE("doorToggle"),  
+		TIMER("timer"),  
+		TOSS("toss"),  
+		ONTAINER_OPEN("containerOpen"),  
+		CONTAINER_CLOSED("containerClosed"),  
+		LOGIN("login"),  
+		LOGOUT("logout"),  
+		CHAT("chat"),  
+		DAMAGED_ENTITY("damagedEntity"),  
+		DIALOG_CLOSE("dialogClose"),  
+		SPAWN("spawn"),  
+		TOSSED("tossed"),
+		PICKEDUP("pickedUp"),  
+		PICKUP("pickUp"),  
+		ATTACK("attack"),  
+		PROJECTILE_TICK("projectileTick"),
+		PROJECTILE_IMPACT("projectileImpact"),
+		FACTION_UPDATE("factionUpdate"),  
+		LEVEL_UP("levelUp"),  
+		QUEST_START("questStart"),  
+		QUEST_COMPLETED("questCompleted"),  
+		QUEST_TURNIN("questTurnIn"),  
+		KEY_PRESSED("keyPressed"),  
+		CUSTOM_CHEST_CLOSED("customChestClosed"),  
+		CUSTOM_CHEST_CLICKED("customChestClicked"),  
+		SCRIPT_COMMAND("scriptCommand"),  
+		CUSTOM_GUI_CLOSED("customGuiClosed"),
+		CUSTOM_GUI_BUTTON("customGuiButton"),
+		CUSTOM_GUI_SLOT("customGuiSlot"),
+		CUSTOM_GUI_SCROLL("customGuiScroll");
