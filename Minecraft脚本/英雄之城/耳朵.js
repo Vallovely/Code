@@ -5,22 +5,29 @@ function init(event){
     extend = 1;
 }
 function damage(event){
-    if(event.npc.getHealth() < event.npc.getMaxHealth() * 0.75){
+    if(event.npc.getHealth() < event.npc.getMaxHealth() * 0.66){
         extend = 2;
-    }else if(event.npc.getHealth() < event.npc.getMaxHealth() * 0.5){
+    }else if(event.npc.getHealth() < event.npc.getMaxHealth() * 0.33){
         extend = 3;
-    }else if(event.npc.getHealth() < event.npc.getMaxHealth() * 0.25){
-        extend = 4;
     }
 }
 function tick(event){
-    n=event.npc;
-    timer++;
-    if(timer >= 20){//每20个tick约10s执行一次
-        /*
-        大概是不允许
-        */
+    npc=event.npc;
+    if(timer <= 50){
+        timer++;
     }
+    if(timer == 20){//每20个tick约10s执行一次
+        //提示技能已释放
+        var players = npc.getWorld().getNearbyPlayers(npc.getX(), npc.getY(), npc.getZ(), 10, 0),
+            nx=npc.getX(),
+            ny=npc.getY(),
+            nz=npc.getZ();
+        //对附近玩家造成伤害
+        for(var i=0;i<players.length;i++){
+            npc.setPosition(nx, ny+1, nz);
+        }
+    }
+    if(time >=)
 }
 function die(event){
     timer = 0;
