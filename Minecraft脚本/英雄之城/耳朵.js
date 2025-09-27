@@ -13,10 +13,13 @@ function damage(event){
 }
 function tick(event){
     npc=event.npc;
-    if(timer <= 50){
+    if(timer <= 49){
         timer++;
     }
-    if(timer == 20){//每20个tick约10s执行一次
+    if(timer == 20){
+        //提醒释放技能
+    }
+    if(timer == 26){//每20个tick约10s执行一次
         //提示技能已释放
         var players = npc.getWorld().getNearbyPlayers(npc.getX(), npc.getY(), npc.getZ(), 10, 0),
             nx=npc.getX(),
@@ -27,7 +30,9 @@ function tick(event){
             npc.setPosition(nx, ny+1, nz);
         }
     }
-    if(time >=)
+    if(timer == 50){
+        timer = 0;
+    }
 }
 function die(event){
     timer = 0;
